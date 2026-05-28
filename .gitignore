@@ -1,0 +1,58 @@
+# deps
+node_modules
+.pnp
+.pnp.js
+
+# next
+.next/
+out/
+build/
+
+# env (contient clés sensibles)
+.env
+.env.local
+.env.local.json
+.env.development.local
+.env.production.local
+
+# logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea
+.vscode/*
+!.vscode/settings.json
+
+# local tooling / agent configs
+.agents/
+.claude/
+.cursor/
+AGENTS.md
+
+# Supabase
+.branches
+.temp
+
+# testing
+coverage/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# scrapers local outputs
+scrapers/.cache/
+scrapers/.output/
+
+# previews / outputs locaux (contiennent potentiellement des emails/data perso)
+tmp/
+
+# audits ponctuels (snapshots locaux, regenerables via npm run audit:urls)
+audit-*.csv
+
+.vercel

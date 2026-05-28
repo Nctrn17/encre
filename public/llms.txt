@@ -1,0 +1,31 @@
+# Encre
+
+> Encre est un agrégateur francophone indépendant d'appels à projets, résidences d'artistes, bourses et prix pour scénaristes et auteurs. Le périmètre pilote actuel couvre l'écriture audiovisuelle (scénario cinéma, télévision, série, documentaire, création sonore, narration web). Accès gratuit, sans publicité, sans paywall, sans rétention d'informations. Données hébergées en France.
+
+## Sections principales
+
+- /aides : registre intégral des appels ouverts à candidature, classés par date limite
+- /pays-du-sud : aides réservées aux créateurs francophones des pays du Sud (zone OIF, TV5MONDE+, Doha Film Institute, etc.)
+- /outremer : aides DROM-COM et aides métropolitaines accessibles aux auteurs ultra-marins (transport, logement couverts)
+- /disciplines : hubs par discipline (cinéma, audiovisuel, documentaire, animation, etc.)
+- /regions : hubs par région française
+- /calendrier : échéances à venir en vue mensuelle, saisonnière, annuelle
+- /sources : liste transparente des émetteurs suivis (DRAC, CNC, CNL, ARTCENA, SCAM, SACD, fondations, agences régionales)
+- /manifeste : positionnement éditorial et modèle de financement
+- /a-propos : fonctionnement technique (collecte, classification, éligibilité, lecture personnalisée)
+
+## Sources de données
+
+Encre suit les pages publiques de : DRAC (13 régions), CNC, CNL, ARTCENA, SCAM (Brouillon d'un rêve), SACD (Beaumarchais), fondations privées, agences régionales du livre et de l'image, OIF, TV5MONDE+, fonds DROM-COM (Guadeloupe, Guyane, Martinique, Réunion, Mayotte, Polynésie, Kanaky, Wallis-et-Futuna).
+
+## Conditions d'accès
+
+Aucun contenu n'est derrière un paywall. Le registre est consultable sans inscription. Un compte optionnel (email uniquement) permet la veille personnalisée et les favoris.
+
+## Citation
+
+Les pages d'Encre peuvent être citées librement. Pour chaque opportunité, la fiche détail (/aides/[slug]) renvoie vers la source officielle de l'émetteur.
+
+## Contact
+
+Voir /contact.

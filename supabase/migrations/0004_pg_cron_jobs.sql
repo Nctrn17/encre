@@ -1,0 +1,57 @@
+-- ==========================================================================
+-- pg_cron jobs
+-- ⚠️ Nécessite pg_cron activé (Supabase Pro) - activer via dashboard
+-- Ces jobs sont des placeholders ; les Edge Functions doivent exister
+-- avant de décommenter les cron.schedule().
+-- ==========================================================================
+
+-- Exemple : appeler Edge Function `process-raw` toutes les 15 minutes
+-- SELECT cron.schedule(
+--   'process-raw-every-15-min',
+--   '*/15 * * * *',
+--   $$
+--   SELECT net.http_post(
+--     url := current_setting('app.settings.supabase_url') || '/functions/v1/process-raw',
+--     headers := jsonb_build_object(
+--       'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key'),
+--       'Content-Type', 'application/json'
+--     ),
+--     body := '{}'::jsonb
+--   );
+--   $$
+-- );
+
+-- Exemple : construction + envoi digests quotidiens à 7h Paris
+-- SELECT cron.schedule(
+--   'send-digests-daily-7am',
+--   '0 5 * * *', -- 5h UTC = 7h Paris (hiver)
+--   $$
+--   SELECT net.http_post(
+--     url := current_setting('app.settings.supabase_url') || '/functions/v1/send-digests',
+--     headers := jsonb_build_object(
+--       'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key'),
+--       'Content-Type', 'application/json'
+--     ),
+--     body := jsonb_build_object('frequency', 'daily')
+--   );
+--   $$
+-- );
+
+-- Exemple : alerte deadline 72h (horaire)
+-- SELECT cron.schedule(
+--   'deadline-alerts-hourly',
+--   '0 * * * *',
+--   $$
+--   SELECT net.http_post(
+--     url := current_setting('app.settings.supabase_url') || '/functions/v1/deadline-alerts',
+--     headers := jsonb_build_object(
+--       'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key'),
+--       'Content-Type', 'application/json'
+--     ),
+--     body := '{}'::jsonb
+--   );
+--   $$
+-- );
+
+-- Note : les compteurs daily_counters se purgent automatiquement via
+-- une policy de rétention à ajouter en v2 (archivage > 30 jours).
