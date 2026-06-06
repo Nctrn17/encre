@@ -29,9 +29,13 @@ export const metadata: Metadata = {
     absolute: "Encre · La revue des aides à l'écriture",
   },
   description:
-    "Résidences, bourses, prix et aides à l'écriture pour scénaristes, autrices et auteurs. Tous métiers de l'écriture, toutes régions. Sans publicité, sans rétention.",
+    "Résidences, bourses, prix et aides à l'écriture pour scénaristes, autrices et auteurs de cinéma et d'audiovisuel. Toutes régions. Sans publicité, sans rétention.",
   alternates: { canonical: '/' },
 }
+
+// Bandeau de l'édition courante. À mettre à jour à la main à chaque nouveau
+// numéro (rythme mensuel), en même temps que le bloc « Ce mois-ci » plus bas.
+const EDITION = 'N° 2 · Juin 2026'
 
 export default async function HomePage() {
   // Mêmes filtres que /aides pour que le compteur reflète exactement ce que
@@ -51,9 +55,9 @@ export default async function HomePage() {
     <article style={pageStyle}>
       {/* ─── BANDEAU DE NUMÉRO ─────────────────────────────── */}
       <header style={mastheadStyle}>
-        <div style={mastheadLineStyle}>Encre · N° 1 · Mai 2026</div>
+        <div style={mastheadLineStyle}>Encre · {EDITION}</div>
         <div style={mastheadTaglineStyle}>
-          La revue qui rend publiques les aides à la création.
+          La revue qui rend publiques les aides à l&apos;écriture.
         </div>
       </header>
 
@@ -89,7 +93,7 @@ export default async function HomePage() {
       </p>
 
       {/* ─── SIGNATURE ─────────────────────────────────────── */}
-      <p style={signatureStyle}>La rédaction. Le 15 mai 2026.</p>
+      <p style={signatureStyle}>La rédaction.</p>
 
       {/* ─── ACTION ────────────────────────────────────────── */}
       <p style={ctaStyle}>
@@ -104,10 +108,14 @@ export default async function HomePage() {
       {/* ─── CE MOIS-CI ────────────────────────────────────── */}
       <section style={monthlySectionStyle}>
         <div style={eyebrowStyle}>Ce mois-ci</div>
+        {/* Texte éditorial à rafraîchir à chaque édition (mensuel). Le compteur
+            {total} reste lu en live ; seules les ouvertures notables sont à
+            réécrire ici. */}
         <p style={monthlyParagraphStyle}>
-          Le registre liste {total} aides ouvertes à candidature. Ouvertures
-          notables : la bourse Doha Film Institute pour les cinéastes des pays
-          du Sud (clôture fin juin), la Bourse Émergence (clôture mi-juin).
+          Le registre liste {total} aides ouvertes à candidature. À surveiller
+          en juin : la bourse Cinéma court métrage de Beaumarchais-SACD (clôture
+          le 9 juin) et la bourse Auteur de Podcast de la Fondation Jean-Luc
+          Lagardère (clôture le 14 juin).
         </p>
       </section>
 

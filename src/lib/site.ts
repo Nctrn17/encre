@@ -27,4 +27,4 @@ export function absoluteUrl(path: string): string {
 export const SITE_NAME = 'Encre'
 
 export const SITE_DESCRIPTION =
-  "Résidences, bourses, prix et aides à l'écriture pour scénaristes et auteurs. Tous métiers de l'écriture, toutes régions."
+  "Résidences, bourses, prix et aides à l'écriture pour scénaristes, autrices et auteurs de cinéma et d'audiovisuel. Toutes régions."
