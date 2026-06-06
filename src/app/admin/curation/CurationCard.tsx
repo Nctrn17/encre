@@ -57,16 +57,16 @@ export function CurationCard({
     })
   }
 
-  function onQuickAction(action: 'mark_ok' | 'awaiting_details' | 'unpublish') {
+  function onQuickAction(action: 'mark_ok' | 'awaiting_details' | 'unpublish' | 'reject') {
     setFeedback(null)
     startTransition(async () => {
       const res = await applyCurationQuickAction({ id: opp.id, action })
       if (res.ok) {
         if (action === 'awaiting_details') {
           setAwaiting(true)
-          setPublished(true)
+          setPublished(false)
         }
-        if (action === 'unpublish') {
+        if (action === 'unpublish' || action === 'reject') {
           setPublished(false)
         }
       }
@@ -165,7 +165,11 @@ export function CurationCard({
               <input
                 type="checkbox"
                 checked={awaiting}
-                onChange={(e) => setAwaiting(e.target.checked)}
+                onChange={(e) => {
+                  // Exclusivité : awaiting => hors registre (jamais published).
+                  setAwaiting(e.target.checked)
+                  if (e.target.checked) setPublished(false)
+                }}
               />
               <span>
                 Flag <strong>awaiting_details</strong> (bandeau « modalités à venir » sur la fiche)
@@ -175,7 +179,11 @@ export function CurationCard({
               <input
                 type="checkbox"
                 checked={published}
-                onChange={(e) => setPublished(e.target.checked)}
+                onChange={(e) => {
+                  // Exclusivité : publier => on lève le flag awaiting.
+                  setPublished(e.target.checked)
+                  if (e.target.checked) setAwaiting(false)
+                }}
               />
               <span>
                 <strong>is_published</strong> (visible sur le site public)
@@ -216,6 +224,15 @@ export function CurationCard({
             >
               Dépublier
             </button>
+            <button
+              type="button"
+              onClick={() => onQuickAction('reject')}
+              disabled={isPending}
+              style={dangerBtnStyle}
+              title="Pierre tombale : l'annonce ne reviendra jamais au scrape. Action terminale."
+            >
+              Rejeter ⛔
+            </button>
             {feedback && (
               <span
                 style={{
@@ -233,9 +250,12 @@ export function CurationCard({
   )
 }
 
-function quickActionFeedback(action: 'mark_ok' | 'awaiting_details' | 'unpublish'): string {
+function quickActionFeedback(
+  action: 'mark_ok' | 'awaiting_details' | 'unpublish' | 'reject',
+): string {
   if (action === 'awaiting_details') return 'Flaggé en attente'
   if (action === 'unpublish') return 'Dépublié'
+  if (action === 'reject') return 'Rejeté (ne reviendra plus)'
   return 'Marqué OK'
 }
 

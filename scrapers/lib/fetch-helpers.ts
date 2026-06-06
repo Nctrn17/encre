@@ -1,5 +1,5 @@
 /**
- * Helpers HTTP pour scrapers - timeout, retry, user-agent honnête, throttling
+ * Helpers HTTP pour scrapers — timeout, retry, user-agent honnête, throttling
  * par hôte, et respect de robots.txt.
  *
  * Politesse :
@@ -137,7 +137,7 @@ async function throttleHost(host: string, minDelayMs: number): Promise<void> {
 }
 
 // ──────────────────────────────────────────────────────────────────────────
-// robots.txt - fetch + parse + cache
+// robots.txt — fetch + parse + cache
 // ──────────────────────────────────────────────────────────────────────────
 
 function safeParseUrl(url: string): URL | null {

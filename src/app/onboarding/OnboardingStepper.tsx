@@ -13,7 +13,7 @@ import { FR_REGION_CODES, type FrRegionCode } from '@/lib/region-codes'
 
 type Step = 1 | 2 | 3
 
-// Disciplines pilote scénariste - affichées en chips Fraunces dans le mockup.
+// Disciplines pilote scénariste — affichées en chips Fraunces dans le mockup.
 // Mappent vers les slugs taxonomie macro pour la création du alert_profile,
 // plus vers disciplines_tags pour un matching fin.
 interface DisciplineChoice {
@@ -121,7 +121,7 @@ export function OnboardingStepper({
   const [previewError, setPreviewError] = useState<string | null>(null)
   const [preview, setPreview] = useState<AlertProfilePreview | null>(null)
 
-  // Live counter - approximé localement, le backend pourrait renvoyer un
+  // Live counter — approximé localement, le backend pourrait renvoyer un
   // compte réel via une query côté serveur (à brancher plus tard)
   const matchCount = useMemo(() => {
     const base = 40
@@ -366,7 +366,7 @@ function nationalityFromResidency(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// STEP I - Discipline
+// STEP I — Discipline
 // ─────────────────────────────────────────────────────────────────────────────
 
 function StepDisciplines({
@@ -444,7 +444,7 @@ function StepDisciplines({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// STEP II - Situation
+// STEP II — Situation
 // ─────────────────────────────────────────────────────────────────────────────
 
 function StepSituation({
@@ -511,7 +511,7 @@ function StepSituation({
               Plusieurs guichets exigent un producteur attaché, un nombre
               minimum de films précédemment produits, ou imposent une condition
               d&apos;âge. Indiquez votre situation : la base n&apos;affichera que
-              les dispositifs réellement ouverts à vous.
+              les appels réellement ouverts à vous.
             </p>
 
             <Question label="Avez-vous un producteur attaché au projet ?">
@@ -537,7 +537,7 @@ function StepSituation({
               <Radio name="films" checked={films === 'long'} onClick={() => onFilms('long')} label="Un ou plusieurs longs" />
             </Question>
 
-            <Question label="Âge, optionnel, utilisé uniquement pour filtrer les dispositifs jeunesse">
+            <Question label="Âge, optionnel, utilisé uniquement pour filtrer les aides jeunesse">
               <Radio name="age" checked={age === 'u30'} onClick={() => onAge('u30')} label="Moins de 30 ans" />
               <Radio name="age" checked={age === '30-45'} onClick={() => onAge('30-45')} label="30-45 ans" />
               <Radio name="age" checked={age === '45p'} onClick={() => onAge('45p')} label="Plus de 45 ans" />
@@ -560,7 +560,7 @@ function StepSituation({
               <Radio name="gender" checked={genderContext === 'woman_or_gender_minority'} onClick={() => onGenderContext('woman_or_gender_minority')} label="Femme ou minorite de genre" />
             </Question>
 
-            <Question label="Statuts utiles a certains guichets">
+            <Question label="Statuts utiles à certains guichets">
               <ToggleChip checked={professionalStatuses.has('sacd_member')} onClick={() => onToggleProfessionalStatus('sacd_member')} label="SACD" />
               <ToggleChip checked={professionalStatuses.has('scam_member')} onClick={() => onToggleProfessionalStatus('scam_member')} label="SCAM" />
             </Question>
@@ -596,7 +596,7 @@ function StepSituation({
                   >
                     Recommandé · filtre hors-réseau
                   </strong>
-                  Ne pas afficher les dispositifs réservés aux réseaux fermés
+                  Ne pas afficher les appels réservés aux réseaux fermés
                   (Fémis, résidences cooptées, prix sur invitation), ni ceux
                   exigeant un appui institutionnel préalable.
                 </span>
@@ -645,7 +645,7 @@ function Radio({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// STEP III - Géographie & cadence
+// STEP III — Géographie & cadence
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ToggleChip({
@@ -730,7 +730,7 @@ function StepGeoCadence({
               }}
             >
               Les fonds régionaux exigent une résidence ou un attachement au
-              territoire. Les dispositifs nationaux sont ouverts à tout·e
+              territoire. Les appels nationaux sont ouverts à tout·e
               résident·e en France. Cochez votre région, et les zones
               voisines où vous seriez prêt·e à candidater.
             </p>
@@ -752,7 +752,7 @@ function StepGeoCadence({
                   checked={nationalOnly}
                   onChange={onToggleNational}
                 />
-                <span className="chip-label">Dispositifs nationaux</span>
+                <span className="chip-label">Appels nationaux</span>
               </label>
               <label>
                 <input

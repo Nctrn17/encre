@@ -17,7 +17,7 @@ const PILOT_DISCIPLINES: DisciplineSlug[] = ['cinema', 'audiovisuel']
 export const metadata: Metadata = {
   title: 'Aides à l’écriture audiovisuelle',
   description:
-    'Appels à projets, résidences et bourses pour scénaristes, réalisateurs et auteurs-documentaristes.',
+    'Appels à projets, résidences et bourses pour scénaristes, réalisatrices et réalisateurs, autrices et auteurs de documentaire.',
 }
 
 export default function DisciplinesIndexPage() {

@@ -1,12 +1,13 @@
 /**
  * Constantes du périmètre V1 pilote scénariste / auteur AV.
  *
- * Encre cible en V1 les scénaristes et auteurs de l'audiovisuel (cinéma,
- * série, documentaire, court / long, animation, sonore, web).
+ * Cf. memory project_le_carnet et docs/PILOTE-SCENARISTES.md : Encre cible
+ * en V1 les scénaristes et auteurs de l'audiovisuel (cinéma, série,
+ * documentaire, court / long, animation, sonore, web).
  *
  * Ces tags servent de filtre par défaut sur la home (compteur d'appels
  * en cours) et sur /aides (liste). Toujours utiliser cette source
- * unique pour rester cohérent, sinon le compteur de la home promet plus
+ * unique pour rester cohérent — sinon le compteur de la home promet plus
  * d'opps que la liste n'en affiche réellement.
  */
 export const PILOT_SCENARISTE_TAGS = [
@@ -33,14 +34,27 @@ export type PilotScenaristeTag = (typeof PILOT_SCENARISTE_TAGS)[number]
  *
  *   - 'non-scenariste' : aides producteurs / distributeurs / exploitants /
  *     techniques (CNC industriel), structurellement hors scope auteur.
- *   - 'pays-du-sud' : aides réservées aux ressortissants des pays du Sud
- *     membres de l'OIF, inéligibles aux auteurs FR métropole. Restent
- *     visibles via la section dédiée /pays-du-sud.
+ *   Décision 2026-05-29 : 'pays-du-sud' N'EST PLUS exclu. Ces aides sont
+ *   rares, on choisit de les inclure dans le listing par défaut (en plus de
+ *   la section dédiée /pays-du-sud) plutôt que de les masquer.
  *
  * Note : 'outremer' n'est PAS exclu (les auteurs ultra-marins sont FR et
  * éligibles aux aides DROM-COM comme aux aides métropole).
  */
-export const LISTING_DEFAULT_EXCLUDE_TAGS = ['non-scenariste', 'pays-du-sud'] as const
+export const LISTING_DEFAULT_EXCLUDE_TAGS = ['non-scenariste'] as const
+
+/**
+ * Toggles activés par défaut sur /aides (cible V1 = auteurs hors-réseau, qui
+ * n'ont structurellement ni producteur ni éditeur attaché). Source unique
+ * partagée avec le compteur de la home — sinon le compteur promet plus d'opps
+ * que la liste n'en affiche réellement (cf. divergence corrigée le 2026-05-30).
+ *
+ * /aides applique ces filtres côté requête (excludeRequiresProducer /
+ * excludeRequiresEditor de listOpportunities) ; le compteur de la home les passe
+ * à l'identique pour rester aligné au nombre affiché après clic.
+ */
+export const LISTING_DEFAULT_SANS_PRODUCTEUR = true
+export const LISTING_DEFAULT_SANS_EDITEUR = true
 
 /**
  * Macro-disciplines incluses dans le scope V1 launch.

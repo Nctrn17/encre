@@ -76,7 +76,7 @@ describe('findSuspectChars', () => {
   })
 
   it('finds Arabic combining marks mid-word', () => {
-    // Cas réel observé : "Examenينdes" - Arabic chars insérés entre
+    // Cas réel observé : "Examenينdes" — Arabic chars insérés entre
     // "Examen" et "des" (ي + ن = 2 chars arabes)
     const findings = findSuspectChars('Examenينdes dossiers')
     expect(findings.length).toBe(2)
@@ -169,7 +169,7 @@ describe('stripSuspectChars', () => {
   })
 
   it('preserves all French chars, punctuation, and whitespace', () => {
-    const text = 'Œuvre - clôture : 1er février 2026 ; cf. § 4.5 (l\'article)'
+    const text = 'Œuvre — clôture : 1er février 2026 ; cf. § 4.5 (l\'article)'
     const r = stripSuspectChars(text)
     expect(r.text).toBe(text)
     expect(r.removedCount).toBe(0)

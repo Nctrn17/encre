@@ -1,4 +1,4 @@
--- Migration 0018 - Sections structurées de la fiche détail
+-- Migration 0018 — Sections structurées de la fiche détail
 --
 -- Contexte : la fiche détail (mockup v6-detail) doit afficher quatre sections
 -- distinctes (Présentation / Conditions / Calendrier / Dossier de candidature).

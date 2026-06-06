@@ -1,12 +1,12 @@
 /**
- * Détection de qualité texte FR - quality.ts.
+ * Détection de qualité texte FR — quality.ts.
  *
  * Détecte les caractères / tokens manifestement non-français qui peuvent
  * apparaître dans la sortie d'un LLM hallucinant (cas observés sur Gemma
  * 4 31B en mai 2026 : « localizar », « särskilt », « cứrtal », ينand
  * combinaisons arabes au milieu de mots français).
  *
- * Ne corrige PAS - flagge uniquement. La correction est manuelle via
+ * Ne corrige PAS — flagge uniquement. La correction est manuelle via
  * `/curate-paste` ou re-classify, parce que stripper automatiquement
  * un caractère non-français risque de couper du contenu légitime
  * (titre étranger référencé, citation, etc.).
@@ -68,7 +68,7 @@ export function classifyChar(ch: string): string | null {
   // Latin Extended B (U+0180–U+024F)
   if (cp >= 0x0180 && cp <= 0x024f) return 'latin-extended-b'
 
-  // Latin Extended Additional (U+1E00–U+1EFF) - vietnamien, gallois,
+  // Latin Extended Additional (U+1E00–U+1EFF) — vietnamien, gallois,
   // certaines langues africaines.
   if (cp >= 0x1e00 && cp <= 0x1eff) return 'latin-extended-additional'
 
@@ -90,7 +90,7 @@ export function classifyChar(ch: string): string | null {
   // Thai (U+0E00–U+0E7F)
   if (cp >= 0x0e00 && cp <= 0x0e7f) return 'thai'
 
-  // CJK Unified (U+4E00–U+9FFF) - chinois, japonais kanji
+  // CJK Unified (U+4E00–U+9FFF) — chinois, japonais kanji
   if (cp >= 0x4e00 && cp <= 0x9fff) return 'cjk'
 
   // Hiragana (U+3040–U+309F), Katakana (U+30A0–U+30FF)
@@ -146,7 +146,7 @@ export function hasSuspectChars(text: string): boolean {
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Strip - supprime les chars non-français d'un texte.
+// Strip — supprime les chars non-français d'un texte.
 //
 // USAGE PRÉVU : sanitizer le texte source AVANT de l'envoyer au LLM.
 // Les pages institutionnelles FR contiennent parfois du texte non-FR
@@ -189,7 +189,7 @@ export function stripSuspectChars(text: string | null | undefined): StripResult 
     if (kind) {
       removedByKind[kind] = (removedByKind[kind] ?? 0) + 1
       removedCount++
-      // Skip - on ne remplace pas par un espace pour éviter de créer
+      // Skip — on ne remplace pas par un espace pour éviter de créer
       // des trous de mots qui ne sont plus des mots français.
       // Gemma préfère "Examendes" mal collé à "Examen[espace]des"
       // qui est ambigu sur la frontière de mot.

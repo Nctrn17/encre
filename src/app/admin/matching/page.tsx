@@ -273,7 +273,7 @@ function KeyValue({ title, rows }: { title: string; rows: Array<[string, string]
         {rows.map(([key, value]) => (
           <div key={key} className="grid grid-cols-[140px_1fr] gap-3">
             <dt className="font-mono text-xs text-muted">{key}</dt>
-            <dd className="break-words">{value || '—'}</dd>
+            <dd className="break-words">{value || '-'}</dd>
           </div>
         ))}
       </dl>

@@ -41,7 +41,7 @@ function getWebcalUrl(): string {
  * Stratégie SEO :
  *   - 24 slugs pré-générés via generateStaticParams (mois glissants + 3 années
  *     + 8 saisons sur 2 ans). Les autres sont rendus à la demande puis cachés.
- *   - revalidate = 1800s (30 min) - l'inventaire bouge peu après le scrape quotidien
+ *   - revalidate = 1800s (30 min) — l'inventaire bouge peu après le scrape quotidien
  *   - Schema.org Event JSON-LD pour chaque opportunité (Google Events ingestion)
  *   - noindex sur les périodes entièrement passées ou vides (anti dilution)
  */
@@ -211,7 +211,7 @@ function Hero({
                 num={
                   stats.amountCumulMillions >= 1
                     ? `${stats.amountCumulMillions.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} M€`
-                    : '—'
+                    : '-'
                 }
                 label="Montant cumulé"
               />
@@ -563,7 +563,7 @@ function CalRow({ opp }: { opp: Opportunity }) {
       </div>
       <div className="mono" style={{ textAlign: 'right', fontSize: '0.85rem', color: past ? 'var(--ink-soft)' : 'var(--ink)' }}>
         <span style={{ color: urgent ? 'var(--vermillion)' : past ? 'var(--ink-soft)' : 'var(--ink)', fontWeight: 500 }}>
-          {past ? `J+${Math.abs(days)}` : `J−${days}`}
+          {past ? `J+${Math.abs(days)}` : `J-${days}`}
         </span>
         <br />
         <span style={{ color: 'var(--ink-soft)', fontSize: '0.7rem' }}>{formatDeadlineHour(deadline)}</span>
@@ -587,7 +587,7 @@ const SEASON_BLURBS: Record<string, { months: string; blurb: string }> = {
   },
   automne: {
     months: 'Sept. · Oct. · Nov.',
-    blurb: 'La saison la plus dense : SACEM, FCM, FAJV, CNC, ARTCENA grands lauréats.',
+    blurb: 'La saison la plus dense : SACEM, FCM, FAJV, CNC, ARTCENA, les grands prix.',
   },
   hiver: {
     months: 'Déc. · Janv. · Fév.',
@@ -602,7 +602,7 @@ function Seasons({ referenceYear, monthCounts }: { referenceYear: number; monthC
   for (let m = 9; m <= 11; m += 1) seasonCounts.automne += monthCounts[`${referenceYear}-${String(m).padStart(2, '0')}`] ?? 0
   seasonCounts.hiver += monthCounts[`${referenceYear}-12`] ?? 0
   // Note: hiver chevauche, mais on n'affiche que la portion de l'année en cours
-  // pour rester lisible - la fiche saison hiver-N parsera correctement les 3 mois.
+  // pour rester lisible — la fiche saison hiver-N parsera correctement les 3 mois.
 
   return (
     <section style={{ padding: '80px 0', background: 'var(--paper)' }}>
@@ -811,7 +811,7 @@ function Closer() {
 function CalendarSchema({ items, periode }: { items: Opportunity[]; periode: ParsedPeriod }) {
   const baseUrl = getSiteUrl()
 
-  // ItemList wrapping all events for the period - Google Events ingestion preferred shape.
+  // ItemList wrapping all events for the period — Google Events ingestion preferred shape.
   const itemList = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -840,7 +840,6 @@ function CalendarSchema({ items, periode }: { items: Opportunity[]; periode: Par
   return (
     <script
       type="application/ld+json"
-      // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }}
     />
   )

@@ -1,5 +1,5 @@
 -- ==========================================================================
--- agreg-culture - Schéma initial
+-- agreg-culture — Schéma initial
 -- 8 tables : sources, raw_items, opportunities, opportunity_embeddings,
 -- profiles, alert_profiles, saved_opportunities, pending_digests
 -- ==========================================================================

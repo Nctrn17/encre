@@ -7,7 +7,7 @@ import {
   isPeriodFullyPast,
 } from '../src/lib/period'
 
-describe('parsePeriodSlug - mois', () => {
+describe('parsePeriodSlug — mois', () => {
   it('parse un mois standard', () => {
     const p = parsePeriodSlug('2026-06')
     expect(p).not.toBeNull()
@@ -38,7 +38,7 @@ describe('parsePeriodSlug - mois', () => {
   })
 })
 
-describe('parsePeriodSlug - année', () => {
+describe('parsePeriodSlug — année', () => {
   it('parse une année', () => {
     const p = parsePeriodSlug('2026')!
     expect(p.kind).toBe('year')
@@ -54,7 +54,7 @@ describe('parsePeriodSlug - année', () => {
   })
 })
 
-describe('parsePeriodSlug - saisons', () => {
+describe('parsePeriodSlug — saisons', () => {
   it('printemps = mars-avril-mai', () => {
     const p = parsePeriodSlug('printemps-2026')!
     expect(p.kind).toBe('season')
@@ -96,7 +96,7 @@ describe('parsePeriodSlug - saisons', () => {
   })
 })
 
-describe('parsePeriodSlug - entrée invalide', () => {
+describe('parsePeriodSlug — entrée invalide', () => {
   it('retourne null sur entrées vides ou inattendues', () => {
     expect(parsePeriodSlug('')).toBeNull()
     expect(parsePeriodSlug('   ')).toBeNull()

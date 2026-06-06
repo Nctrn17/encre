@@ -24,7 +24,7 @@ export interface SendOptions {
   preview?: boolean
   /** Filtrer par frequency */
   frequencies?: Array<'daily' | 'weekly' | 'deadline_only'>
-  /** Override destinataire (pour test - tous les mails iront là) */
+  /** Override destinataire (pour test — tous les mails iront là) */
   overrideRecipient?: string
   /** Forcer un user (test) */
   onlyUserId?: string

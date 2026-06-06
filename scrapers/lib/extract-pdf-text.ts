@@ -11,7 +11,7 @@
  * Stratégie :
  *   - fetch via fetchWithRetry (User-Agent honnête, throttle, robots)
  *   - skip si Content-Type ≠ application/pdf (lien faux PDF)
- *   - skip si Content-Length > MAX_PDF_BYTES (10 MB) - probable PDF
+ *   - skip si Content-Length > MAX_PDF_BYTES (10 MB) — probable PDF
  *     scanné lourd, peu utile pour le texte
  *   - parse via `pdf-parse` (sync, robuste, gère la majorité des PDFs FR)
  *   - normalise les blancs, tronque à `maxChars`
@@ -100,7 +100,7 @@ export async function extractPdfText(
 
   const normalized = normalizePdfText(rawText)
   if (normalized.length < MIN_USEFUL_CHARS) {
-    console.warn(`  [extract-pdf] texte trop court (${normalized.length} chars) sur ${url} - probablement PDF scanné`)
+    console.warn(`  [extract-pdf] texte trop court (${normalized.length} chars) sur ${url} — probablement PDF scanné`)
     return null
   }
 

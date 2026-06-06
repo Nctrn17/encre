@@ -54,7 +54,7 @@ export default function AboutPage() {
           dizaines d&apos;organismes qui financent l&apos;écriture,
           l&apos;image et le son : DRAC, CNC, CNL, ARTCENA, SCAM, SACD,
           fondations, agences régionales, programmes pour les pays du Sud
-          Global, dispositifs ouverts aux territoires d&apos;Outre-mer,
+          Global, appels ouverts aux territoires d&apos;Outre-mer,
           appels réservés aux femmes et minorités de genre, et aux
           sociétaires des sociétés d&apos;auteurs. La liste complète est
           consultable sur{' '}

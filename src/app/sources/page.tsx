@@ -54,7 +54,8 @@ export default async function SourcesPage() {
 
   const [{ data: sourcesRaw }, { data: oppsRaw }] = await Promise.all([
     supabase
-      .from('sources')
+      // Vue publique (config purgée des clés sensibles, cf. migration 0037).
+      .from('sources_public')
       .select('id, slug, name, kind, config, is_active, last_run_at')
       .eq('is_active', true)
       .neq('kind', 'manual')

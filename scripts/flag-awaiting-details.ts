@@ -18,7 +18,7 @@ config({ path: '.env.local', override: true })
 import { createClient } from '@supabase/supabase-js'
 
 const TARGETS: { source_url: string; reason: string }[] = [
-  // Le Groupe Ouest (4) - modalités par session sur pages individuelles,
+  // Le Groupe Ouest (4) — modalités par session sur pages individuelles,
   // pages d'accueil de chaque workshop sont juste descriptives
   {
     source_url: 'https://www.legroupeouest.com/workshops-en-residence/le-raconte-moi/',

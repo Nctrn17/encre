@@ -907,6 +907,9 @@ body {
 .opp-card .facts .val.urgent { color: var(--vermillion); }
 .opp-card .facts .val.kelp { color: var(--kelp); }
 
+/* Carte d'opportunité (composant OpportunityCard, hubs /disciplines /regions). */
+.opp-card-link:hover { border-color: var(--vermillion); background: rgba(200, 54, 43, 0.05); }
+
 .badge-hr {
   font-family: var(--font-mono);
   font-size: 9.5px;

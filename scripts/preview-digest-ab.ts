@@ -1,10 +1,13 @@
 #!/usr/bin/env tsx
 /**
  * Génère 2 previews HTML du digest (variantes A et B) à partir de vraies
- * opportunités de la DB et les envoie par mail au destinataire défini dans
- * PREVIEW_DIGEST_TO, avec subject clair `[A]` / `[B]` pour comparer.
+ * opportunités de la DB et les envoie en mail au destinataire DIGEST_PREVIEW_TO,
+ * avec subject clair `[A]` / `[B]` pour comparer.
  *
  * Aussi écrit les 2 HTML dans tmp/digest-preview-AB/ pour comparaison disque.
+ *
+ * Script jetable — sera supprimé une fois la variante choisie portée dans
+ * src/lib/digest/template.ts.
  *
  *   npm run preview:digest-ab            # dump disque + envoi mail
  *   npm run preview:digest-ab -- --no-send   # juste disque
@@ -28,11 +31,11 @@ import {
 import { labelForRegion } from '../src/lib/region-codes'
 import { formatAmount } from '../src/lib/utils'
 
-const RECIPIENT = process.env.PREVIEW_DIGEST_TO ?? ''
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:4000'
+const RECIPIENT = process.env.DIGEST_PREVIEW_TO ?? process.env.CURATION_DIGEST_TO ?? ''
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://encre.io'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Variante A - Palette Encre v9 (structure inchangée, chromaticité revue)
+// Variante A — Palette Encre v9 (structure inchangée, chromaticité revue)
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Palette mail = palette site (cf. globals.css). Mêmes tokens que
@@ -114,7 +117,7 @@ function renderACard(o: Opportunity): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Variante B - Refonte éditoriale (hero + stats + sections + countdown)
+// Variante B — Refonte éditoriale (hero + stats + sections + countdown)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const B_COLORS = A_COLORS // même palette Encre v9

@@ -1,9 +1,9 @@
 /**
  * Types DB générés depuis Supabase.
- * Stub initial, à régénérer avec `npm run db:types` une fois Supabase connecté.
+ * Stub initial — à régénérer avec `npm run db:types` une fois Supabase connecté.
  *
  * NOTE: tant que les types ne sont pas générés, les `as any` sont tolérés
- * dans le code.
+ * dans le code (cf. problèmes connus du projet).
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -20,6 +20,14 @@ export interface Database {
   public: {
     Tables: {
       sources: {
+        Row: any
+        Insert: any
+        Update: any
+        Relationships: []
+      }
+      // Vue publique (migration 0037) : sources actives, config purgée de ses
+      // clés sensibles. Lue par le client anon (page /sources).
+      sources_public: {
         Row: any
         Insert: any
         Update: any
@@ -81,6 +89,11 @@ export interface Database {
           eligibility_profile?: Json | null
           eligibility_summary?: string | null
           eligibility_confidence?: 'explicit' | 'inferred' | 'unknown' | null
+          // ── État `rejected` (migration 0040) ───────────────────────
+          // Pierre tombale : annonce écartée par curation humaine. Ligne
+          // conservée (fingerprint bloque la recréation) mais jamais
+          // republiée ni reproposée. Optionnel : compat fixtures pré-migration.
+          rejected?: boolean
         }
         Insert: any
         Update: any

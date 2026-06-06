@@ -2,7 +2,12 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { WaitlistForm } from '@/components/forms/WaitlistForm'
 import { listOpportunities } from '@/features/opportunities/queries'
-import { PILOT_SCENARISTE_TAGS, LISTING_DEFAULT_EXCLUDE_TAGS } from '@/lib/pilot-defaults'
+import {
+  PILOT_SCENARISTE_TAGS,
+  LISTING_DEFAULT_EXCLUDE_TAGS,
+  LISTING_DEFAULT_SANS_PRODUCTEUR,
+  LISTING_DEFAULT_SANS_EDITEUR,
+} from '@/lib/pilot-defaults'
 
 /**
  * Encre · première page de revue.
@@ -24,7 +29,7 @@ export const metadata: Metadata = {
     absolute: "Encre · La revue des aides à l'écriture",
   },
   description:
-    "Résidences, bourses, prix et aides à l'écriture pour scénaristes et auteurs. Tous métiers de l'écriture, toutes régions. Sans publicité, sans rétention.",
+    "Résidences, bourses, prix et aides à l'écriture pour scénaristes, autrices et auteurs. Tous métiers de l'écriture, toutes régions. Sans publicité, sans rétention.",
   alternates: { canonical: '/' },
 }
 
@@ -36,6 +41,10 @@ export default async function HomePage() {
     offset: 0,
     disciplinesTagsAny: [...PILOT_SCENARISTE_TAGS],
     disciplinesTagsExclude: [...LISTING_DEFAULT_EXCLUDE_TAGS],
+    // Mêmes toggles par défaut que /aides, sinon le compteur surcompte les
+    // opps producteur/éditeur que la liste masque (cf. LISTING_DEFAULT_SANS_*).
+    excludeRequiresProducer: LISTING_DEFAULT_SANS_PRODUCTEUR,
+    excludeRequiresEditor: LISTING_DEFAULT_SANS_EDITEUR,
   })
 
   return (
@@ -55,7 +64,7 @@ export default async function HomePage() {
       <p style={paragraphStyle}>
         <span style={dropCapStyle}>C</span>ombien de jeunes scénaristes savent
         que leur écriture peut être financée, même avant leur premier film ?
-        Parmi eux, combien connaissent toutes les aides qui existent, avec
+        Et combien connaissent toutes les aides qui existent, avec
         toutes les conditions, les deadlines, et les détails ?
       </p>
 
@@ -81,6 +90,13 @@ export default async function HomePage() {
 
       {/* ─── SIGNATURE ─────────────────────────────────────── */}
       <p style={signatureStyle}>La rédaction. Le 15 mai 2026.</p>
+
+      {/* ─── ACTION ────────────────────────────────────────── */}
+      <p style={ctaStyle}>
+        <Link href="/aides" style={ctaButtonStyle}>
+          Consulter le registre →
+        </Link>
+      </p>
 
       {/* ─── ORNEMENT DE FIN D'ARTICLE ─────────────────────── */}
       <div style={ornamentStyle} aria-hidden="true" />
@@ -177,6 +193,22 @@ const titleStyle: React.CSSProperties = {
   color: 'var(--ink)',
   marginBottom: 28,
   marginTop: 0,
+}
+
+const ctaStyle: React.CSSProperties = {
+  marginTop: 0,
+  marginBottom: 44,
+}
+
+const ctaButtonStyle: React.CSSProperties = {
+  display: 'inline-block',
+  fontFamily: 'var(--font-mono)',
+  fontSize: '0.82rem',
+  letterSpacing: '0.04em',
+  color: 'var(--ink)',
+  textDecoration: 'none',
+  border: '1px solid var(--ink-rule)',
+  padding: '11px 20px',
 }
 
 const chapeauStyle: React.CSSProperties = {

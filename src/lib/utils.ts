@@ -1,4 +1,13 @@
 /**
+ * Normalise les tirets longs (em-dash —, en-dash –, signe moins −) en trait
+ * d'union court. Règle produit : jamais de tiret long dans la copie affichée
+ * (UI, emails) ni dans les données ingérées. Source unique partagée.
+ */
+export function stripLongDashes(input: string): string {
+  return input.replace(/[—–−]/g, '-')
+}
+
+/**
  * Convertit un texte en slug URL-safe.
  */
 export function slugify(input: string, maxLength = 120): string {
@@ -17,7 +26,7 @@ export function slugify(input: string, maxLength = 120): string {
 export function formatAmount(min?: number | null, max?: number | null): string | null {
   if (min == null && max == null) return null
   if (min != null && max != null && min === max) return `${formatEuro(min)}`
-  if (min != null && max != null) return `${formatEuro(min)} – ${formatEuro(max)}`
+  if (min != null && max != null) return `${formatEuro(min)} à ${formatEuro(max)}`
   if (min != null) return `à partir de ${formatEuro(min)}`
   if (max != null) return `jusqu'à ${formatEuro(max)}`
   return null

@@ -225,7 +225,7 @@ export function removeRelatedBlocks(html: string): string {
 
     // Stratégie 1 : si le heading est dans un container manifestement
     // « related » (aside, paragraph--type--related, classe related/aides-list…),
-    // on supprime ce container - il est borné et sûr.
+    // on supprime ce container — il est borné et sûr.
     //
     // ⚠ NE PAS utiliser `article`, `section`, ou `.article-content-scroll`
     // ici : sur certaines pages (CNC FAJV par ex.), TOUT le body est wrappé

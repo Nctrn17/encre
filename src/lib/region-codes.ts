@@ -27,6 +27,12 @@ export const FR_REGION_CODES = {
 
 export type FrRegionCode = keyof typeof FR_REGION_CODES
 
+/** Tuple des codes région (pour validation Zod par enum). */
+export const FR_REGION_CODE_KEYS = Object.keys(FR_REGION_CODES) as [
+  FrRegionCode,
+  ...FrRegionCode[],
+]
+
 export const FR_REGION_SLUGS: Record<FrRegionCode, string> = {
   'FR-ARA': 'auvergne-rhone-alpes',
   'FR-BFC': 'bourgogne-franche-comte',

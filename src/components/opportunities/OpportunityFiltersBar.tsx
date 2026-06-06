@@ -31,7 +31,7 @@ const TYPE_OPTIONS: TypeOption[] = [
   { value: 'concours', label: 'Concours' },
   { value: 'commande', label: 'Commande' },
   { value: 'prix', label: 'Prix' },
-  // Type 'formation' ajouté en migration 0023 - couvre compagnonnages
+  // Type 'formation' ajouté en migration 0023 — couvre compagnonnages
   // (Cité Européenne des Scénaristes) et résidences-école (Series Mania
   // Institute Writers Campus / Eureka Series).
   { value: 'formation', label: 'Formation' },
@@ -217,8 +217,8 @@ export function OpportunityFiltersBar(props: OpportunityFiltersBarProps) {
   }
 
   return (
-    <div ref={containerRef} style={wrapStyle} aria-label="Filtres">
-      <div style={rowStyle} role="toolbar">
+    <div ref={containerRef} style={wrapStyle}>
+      <div style={rowStyle} role="toolbar" aria-label="Filtres">
         <span style={rowPrefixStyle} aria-hidden="true">
           Filtrer :
         </span>
@@ -230,7 +230,7 @@ export function OpportunityFiltersBar(props: OpportunityFiltersBarProps) {
           isOpen={open === 'type'}
           onClick={() => setOpen(open === 'type' ? null : 'type')}
         >
-          <FilterPanel>
+          <FilterPanel label="Type">
             {TYPE_OPTIONS.map((t) => (
               <PanelCheckbox
                 key={t.value}
@@ -249,7 +249,7 @@ export function OpportunityFiltersBar(props: OpportunityFiltersBarProps) {
           isOpen={open === 'discipline'}
           onClick={() => setOpen(open === 'discipline' ? null : 'discipline')}
         >
-          <FilterPanel>
+          <FilterPanel label="Discipline">
             {DISCIPLINE_OPTIONS.map((d) => (
               <PanelCheckbox
                 key={d.tag}
@@ -268,7 +268,7 @@ export function OpportunityFiltersBar(props: OpportunityFiltersBarProps) {
           isOpen={open === 'region'}
           onClick={() => setOpen(open === 'region' ? null : 'region')}
         >
-          <FilterPanel>
+          <FilterPanel label="Région">
             {REGION_OPTIONS.map((code) => (
               <PanelCheckbox
                 key={code}
@@ -287,7 +287,7 @@ export function OpportunityFiltersBar(props: OpportunityFiltersBarProps) {
           isOpen={open === 'deadline'}
           onClick={() => setOpen(open === 'deadline' ? null : 'deadline')}
         >
-          <FilterPanel>
+          <FilterPanel label="Échéance">
             {DEADLINE_OPTIONS.map((d) => (
               <PanelRadio
                 key={d.key || 'all'}
@@ -307,7 +307,7 @@ export function OpportunityFiltersBar(props: OpportunityFiltersBarProps) {
           isOpen={open === 'horsreseau'}
           onClick={() => setOpen(open === 'horsreseau' ? null : 'horsreseau')}
         >
-          <FilterPanel>
+          <FilterPanel label="Hors réseau">
             <PanelCheckbox
               label="Sans producteur"
               checked={props.sansProducteur}
@@ -376,6 +376,7 @@ function FilterTrigger({
         type="button"
         onClick={onClick}
         aria-expanded={isOpen}
+        aria-haspopup="true"
         className="opp-filter-trigger"
         style={{
           ...triggerStyle,
@@ -403,9 +404,9 @@ function FilterTrigger({
   )
 }
 
-function FilterPanel({ children }: { children: React.ReactNode }) {
+function FilterPanel({ children, label }: { children: React.ReactNode; label?: string }) {
   return (
-    <div role="menu" style={panelStyle} className="opp-filter-panel">
+    <div role="group" aria-label={label} style={panelStyle} className="opp-filter-panel">
       <ul style={panelListStyle}>{children}</ul>
     </div>
   )

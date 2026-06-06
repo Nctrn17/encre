@@ -53,8 +53,7 @@ export default function MentionsLegalesPage() {
         <p>
           Les éléments graphiques, typographiques et la structure éditoriale
           du site (charte Encre, typographies Source Serif 4, Inter Tight et
-          JetBrains Mono) sont régis par les licences respectives de leurs
-          auteurs.
+          JetBrains Mono) sont régis par leurs licences respectives.
         </p>
         <p>
           Les contenus informationnels publiés sur le site sont des reprises
@@ -71,7 +70,7 @@ export default function MentionsLegalesPage() {
           quotidiennement depuis les pages publiques des émetteurs. Elles ont
           une valeur indicative. L&apos;éditeur ne garantit ni l&apos;exhaustivité,
           ni l&apos;actualité stricte, ni la conformité au règlement officiel
-          de chaque dispositif.
+          de chaque appel.
         </p>
         <p>
           <strong
@@ -98,7 +97,7 @@ export default function MentionsLegalesPage() {
         <p>
           Pour signaler une information incorrecte, obsolète ou manquante sur
           une fiche, ou pour demander le retrait d&apos;un lien vers votre
-          dispositif : contact@encre.io. Nous traitons toute demande
+          appel : contact@encre.io. Nous traitons toute demande
           sous cinq jours ouvrés.
         </p>
       </LegalSection>

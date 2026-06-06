@@ -1,6 +1,6 @@
 -- ==========================================================================
 -- pg_cron jobs
--- ⚠️ Nécessite pg_cron activé (Supabase Pro) - activer via dashboard
+-- ⚠️ Nécessite pg_cron activé (Supabase Pro) — activer via dashboard
 -- Ces jobs sont des placeholders ; les Edge Functions doivent exister
 -- avant de décommenter les cron.schedule().
 -- ==========================================================================

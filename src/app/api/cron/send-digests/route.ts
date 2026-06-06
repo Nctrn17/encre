@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { checkCronSecret } from '@/lib/cron-auth'
 import { runDigestCycle } from '@/lib/digest/send-digests'
 
 export const runtime = 'nodejs'
@@ -19,10 +20,8 @@ export const maxDuration = 300
  * À brancher à pg_cron (Supabase Pro) ou à GitHub Actions scheduled workflow.
  */
 export async function POST(request: Request) {
-  const secret = request.headers.get('x-cron-secret')
-  if (!secret || secret !== process.env.CRON_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const unauthorized = checkCronSecret(request)
+  if (unauthorized) return unauthorized
 
   const url = new URL(request.url)
   const frequencyParam = url.searchParams.get('frequency')
@@ -44,13 +43,4 @@ export async function POST(request: Request) {
       { status: 500 },
     )
   }
-}
-
-export async function GET() {
-  return NextResponse.json({
-    endpoint: 'send-digests',
-    method: 'POST',
-    auth: 'x-cron-secret header required',
-    params: ['frequency=daily|weekly|deadline_only', 'preview=1'],
-  })
 }

@@ -6,7 +6,7 @@ export const dynamic = 'force-static'
 export const metadata: Metadata = {
   title: 'Données personnelles',
   description:
-    'Politique de confidentialité d’Encre : RGPD, données collectées, droits des utilisateurs.',
+    'Politique de confidentialité d’Encre : RGPD, données collectées, droits des utilisatrices et utilisateurs.',
   alternates: { canonical: '/donnees-personnelles' },
 }
 
@@ -34,7 +34,7 @@ export default function DonneesPersonnellesPage() {
             { k: 'Adresse email', v: 'requise pour l’envoi du digest' },
             { k: 'Disciplines, régions et préférences de cadence', v: 'renseignées volontairement au moment de la création de veille' },
             { k: 'Historique d’envoi des digests', v: 'pour éviter les doublons' },
-            { k: 'Requêtes de recherche anonymes', v: 'pour comprendre les besoins non couverts, sans identifiant utilisateur, adresse IP ni cookie' },
+            { k: 'Requêtes de recherche anonymes', v: 'pour comprendre les besoins non couverts, sans identifiant, adresse IP ni cookie' },
             { k: 'Logs techniques (adresse IP anonymisée, horodatage)', v: 'conservés 30 jours à des fins de sécurité' },
           ].map((item, i) => (
             <li key={i} className="pl-6 relative">

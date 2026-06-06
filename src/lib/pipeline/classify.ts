@@ -70,30 +70,30 @@ Empty si la source ne précise aucune condition.
 ────────────────────────────────────────────────────────────────────────────
 DEUX FORMATS selon la structure de la source :
 
-FORMAT A - Calendrier ponctuel (un seul cycle, étapes uniques type Beaumarchais)
+FORMAT A — Calendrier ponctuel (un seul cycle, étapes uniques type Beaumarchais)
   Une ligne par étape, format "DATE : ÉTAPE".
   Exemple :
     ["30 juin 2026 : clôture des candidatures",
      "Septembre 2026 : auditions",
      "Octobre 2026 : notification des résultats"]
 
-FORMAT C - Cycle récurrent (sessions multiples dans l'année, fréquent sur CNC,
+FORMAT C — Cycle récurrent (sessions multiples dans l'année, fréquent sur CNC,
 culture.gouv.fr, certaines DRAC). Quand la source liste un tableau ≥ 3
 sessions répétitives la même année.
 
-  ⚠ ATTENTION CRITIQUE - Identification de la colonne "clôture" :
+  ⚠ ATTENTION CRITIQUE — Identification de la colonne "clôture" :
 
   Ces tableaux ont SYSTÉMATIQUEMENT plusieurs colonnes de dates :
     - "Ouverture du dépôt" (≈ "ouverture", "depuis le", "début")
-    - "Horaires" (heure d'ouverture, plage horaire - IGNORE)
+    - "Horaires" (heure d'ouverture, plage horaire — IGNORE)
     - "Clôture du dépôt" (≈ "clôture", "fin", "date limite", "deadline",
        "jusqu'au", "avant le")
-    - éventuellement "lien dépôt", "session", "n° de commission" - IGNORE
+    - éventuellement "lien dépôt", "session", "n° de commission" — IGNORE
 
   RÈGLES DE LECTURE :
   1. Lis l'EN-TÊTE du tableau. Identifie la colonne dont le libellé contient
      "clôture", "fin", "date limite", "deadline", "jusqu'au" ou "avant le".
-  2. N'extrais QUE les valeurs de CETTE colonne - pas les autres.
+  2. N'extrais QUE les valeurs de CETTE colonne — pas les autres.
   3. Le NOMBRE DE DATES extraites DOIT être ÉGAL au nombre de sessions :
      5 sessions = 5 dates de clôture, pas 10.
   4. Si tu hésites entre 2 colonnes ou si l'en-tête est ambigu : OMETS le
@@ -108,7 +108,7 @@ sessions répétitives la même année.
               ⚠ Le nombre de dates de la ligne 2 DOIT être égal au N de la ligne 1.
 
   CAS MULTI-TABLEAUX (ex CNC : 1er collège + 2ème collège, ou aide à
-  l'écriture + aide au développement) - si la source liste PLUSIEURS
+  l'écriture + aide au développement) — si la source liste PLUSIEURS
   tableaux distincts pour la MÊME aide avec des calendriers DIFFÉRENTS
   selon la catégorie de candidat, structure étendue à 1 + 2K lignes :
     Ligne 1 : "N sessions par an, M calendriers parallèles (<labels>)"
@@ -125,7 +125,7 @@ sessions répétitives la même année.
     Ligne 1 : "N sessions par an, calendrier annuel récurrent"
     Ligne 2 : "Sessions YYYY terminées, calendrier YYYY+1 à venir"
 
-  Exemple - tableau source :
+  Exemple — tableau source :
     SESSION   ouverture     horaire        clôture          lien
     1 - 2026   17 nov 2025   10h00-18h00   30 jan 2026     dépôt 1
     2 - 2026   06 jan 2026   10h00-18h00   30 mars 2026    dépôt 2
@@ -138,7 +138,7 @@ sessions répétitives la même année.
     ["6 sessions par an, calendrier annuel récurrent",
      "Clôtures 2026 : 30 janvier, 30 mars, 27 avril, 29 juin, 28 septembre, 30 novembre"]
 
-  Note : pas besoin de calculer "prochaine" vs "passée" - l'UI le gérera
+  Note : pas besoin de calculer "prochaine" vs "passée" — l'UI le gérera
   au rendu. Liste juste les clôtures dans l'ordre chronologique.
 
 CHOIX DU FORMAT :
@@ -154,7 +154,7 @@ NE JAMAIS INVENTER UNE DATE. Si la source dit "sélection à l'automne" sans
 date précise, écrire "Automne 2026 : sélection".
 
 ────────────────────────────────────────────────────────────────────────────
-RÈGLE D'EXPIRATION (CRITIQUE - appliquée avant émission du calendrier)
+RÈGLE D'EXPIRATION (CRITIQUE — appliquée avant émission du calendrier)
 ────────────────────────────────────────────────────────────────────────────
 Tu reçois "Date du jour" en tête du message. Compare-la à chaque date du
 calendrier que tu t'apprêtes à émettre.
@@ -301,7 +301,7 @@ export interface ClassifyOptions {
 }
 
 /**
- * Pré-filtre déterministe pour le `type` - évite un appel LLM quand
+ * Pré-filtre déterministe pour le `type` — évite un appel LLM quand
  * le titre contient clairement le type (réduction ~30% du coût).
  */
 export function guessTypeFromText(text: string): (typeof OPPORTUNITY_TYPES)[number] | null {
@@ -469,7 +469,7 @@ export async function classifyOpportunity(
     const cand = json.usageMetadata?.candidatesTokenCount
     const textPart = parts.find((p) => p.text)?.text?.slice(0, 200)
     throw new Error(
-      `No functionCall "classify_opportunity" in Gemini response (${model}) - finish=${finish} thoughts=${thoughts ?? 'n/a'} cand=${cand ?? 'n/a'}${textPart ? ` text="${textPart}"` : ''}`,
+      `No functionCall "classify_opportunity" in Gemini response (${model}) — finish=${finish} thoughts=${thoughts ?? 'n/a'} cand=${cand ?? 'n/a'}${textPart ? ` text="${textPart}"` : ''}`,
     )
   }
 
@@ -516,7 +516,7 @@ export async function classifyOpportunity(
 }
 
 /**
- * Fallback classification sans appel API - utilisée en dev quand pas de clé,
+ * Fallback classification sans appel API — utilisée en dev quand pas de clé,
  * ou en fallback si API down / rate limitée. Précision médiocre mais permet
  * à la pipeline de fonctionner end-to-end.
  */

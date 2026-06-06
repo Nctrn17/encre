@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 /**
- * Favicon dynamique - wordmark Encre miniature.
+ * Favicon dynamique — wordmark Encre miniature.
  * Charcoal "E" sur fond paper, point vermillon.
  */
 

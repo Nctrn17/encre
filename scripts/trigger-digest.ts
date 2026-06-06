@@ -82,7 +82,7 @@ async function main() {
   if (result.errors.length > 0) {
     console.log('\nErrors:')
     for (const e of result.errors) {
-      console.log(`  • [${e.profile_id}] ${e.email} - ${e.message}`)
+      console.log(`  • [${e.profile_id}] ${e.email} — ${e.message}`)
     }
   }
 

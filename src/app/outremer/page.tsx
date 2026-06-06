@@ -24,10 +24,10 @@ export const revalidate = 1800
 export const metadata: Metadata = {
   title: 'Outre-mer',
   description:
-    'Aides spécifiques outre-mer (DROM-COM) et aides métropolitaines accessibles aux auteurs ultra-marins (transport et logement couverts).',
+    'Aides spécifiques outre-mer (DROM-COM) et aides métropolitaines accessibles aux autrices et auteurs ultra-marins (transport et logement couverts).',
   alternates: { canonical: '/outremer' },
   openGraph: {
-    title: "Outre-mer · aides à l'écriture pour auteurs ultra-marins",
+    title: "Outre-mer · aides à l'écriture pour les autrices et auteurs d'outre-mer",
     description:
       'Aides spécifiques DROM-COM et aides métropolitaines avec transport ou logement couverts.',
     type: 'website',
@@ -71,16 +71,16 @@ export default async function OutremerPage() {
             maxWidth: '20ch',
           }}
         >
-          Aides ouvertes aux créateurs d&apos;outre-mer.
+          Aides ouvertes aux créatrices et créateurs d&apos;outre-mer.
         </h1>
         <p style={ledeStyle}>
-          Techniquement, un auteur de Guadeloupe ou de la Réunion peut candidater
+          Techniquement, une autrice ou un auteur de Guadeloupe ou de la Réunion peut candidater
           à une résidence en Bretagne, mais le billet d&apos;avion plus le
           logement sur place rendent la plupart de ces aides{' '}
           <strong style={proseStrongStyle}>structurellement
           inaccessibles</strong>. Cette section regroupe deux choses utiles
-          aux créateurs ultra-marins : les aides ciblées des collectivités
-          DROM-COM, et les dispositifs métropolitains qui couvrent
+          aux créatrices et créateurs ultra-marins : les aides ciblées des collectivités
+          DROM-COM, et les aides métropolitaines qui couvrent
           explicitement les frais de transport et d&apos;hébergement.
         </p>
       </div>
@@ -100,7 +100,7 @@ export default async function OutremerPage() {
       <div style={{ padding: '48px 0 96px' }}>
         <div className="disclaimer">
           <strong>Couverture partielle</strong>
-          Encre référence aujourd&apos;hui les dispositifs principaux des
+          Encre référence aujourd&apos;hui les principales aides des
           5 DROM (Guadeloupe, Guyane, Martinique, Réunion, Mayotte) et l&apos;aide
           sélective CNC pour les cultures d&apos;outre-mer. Pas encore : Polynésie
           française, Kanaky, Wallis-et-Futuna, Saint-Pierre-et-Miquelon.
@@ -194,7 +194,7 @@ function EmptyState() {
       }}
     >
       <p style={{ fontFamily: 'var(--font-serif)', color: 'var(--ink-muted)' }}>
-        Aucun dispositif référencé pour le moment.
+        Aucun appel référencé pour le moment.
       </p>
     </div>
   )

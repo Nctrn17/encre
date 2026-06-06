@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 
 /**
- * Error boundary global - affiché quand un Server Component crash au render
+ * Error boundary global — affiché quand un Server Component crash au render
  * ou qu'un API côté serveur lève une exception non gérée.
  *
  * Note : Next impose que ce soit un Client Component avec 'use client'.

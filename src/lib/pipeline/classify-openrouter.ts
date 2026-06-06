@@ -4,7 +4,7 @@
  * Utilisé comme 3ᵉ étage de cascade dans `scripts/enrich-from-page.ts`
  * quand Gemini Flash + Gemma 4 31B sont tous deux KO (500/503/429).
  *
- * Modèle par défaut : `deepseek/deepseek-chat-v3.1` - function calling
+ * Modèle par défaut : `deepseek/deepseek-chat-v3.1` — function calling
  * natif, qualité comparable Gemini Flash, prix marginal (~$0.10 pour
  * un run complet enrich V1 de 32 opps).
  *
@@ -147,7 +147,7 @@ export async function classifyOpportunityOpenRouter(
     const finish = choice?.finish_reason ?? 'unknown'
     const content = choice?.message?.content?.slice(0, 200) ?? ''
     throw new Error(
-      `No tool_call "${CLASSIFY_FUNCTION_DECLARATION.name}" in OpenRouter response (${model}) - finish=${finish}${content ? ` content="${content}"` : ''}`,
+      `No tool_call "${CLASSIFY_FUNCTION_DECLARATION.name}" in OpenRouter response (${model}) — finish=${finish}${content ? ` content="${content}"` : ''}`,
     )
   }
 

@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 /**
- * Apple touch icon - wordmark Encre, 180x180, paper background.
+ * Apple touch icon — wordmark Encre, 180x180, paper background.
  */
 
 export const size = { width: 180, height: 180 }

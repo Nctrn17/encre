@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { safeNext } from '@/features/auth/safe-next'
 
 /**
  * Callback OAuth / magic link Supabase.
@@ -13,7 +14,7 @@ import { createClient } from '@/lib/supabase/server'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/aides'
+  const next = safeNext(searchParams.get('next'))
 
   if (code) {
     const supabase = await createClient()

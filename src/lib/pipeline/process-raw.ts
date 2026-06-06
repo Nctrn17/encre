@@ -27,6 +27,8 @@ import {
 } from './classify'
 import { embedText, findSemanticDuplicate } from './similarity'
 import { normalizeRawItem } from './normalize'
+import { gradeExtractionQuality } from './extraction-quality'
+import { deadlinesCompatible } from './dedup-rules'
 
 export interface ProcessResult {
   processed: number
@@ -121,13 +123,32 @@ export async function processRawBatch(batchSize = 50): Promise<ProcessResult> {
         continue
       }
 
+      // 3b. Gate qualité de publication.
+      //     Si une dimension (conditions / calendrier / dossier) est vide alors
+      //     que la source la mentionne, ou si le calendrier n'est qu'un en-tête
+      //     de sessions récurrentes sans date de clôture, on bloque la
+      //     publication publique (human_review = true) au lieu de servir une
+      //     fiche partielle. L'opp part alors en file de curation admin.
+      //     Conforme au standard « aucune opp publiée avec donnée partielle ».
+      const quality = gradeExtractionQuality({
+        sourceText: payload.description,
+        sections: {
+          conditions: draft.conditions,
+          calendrier: draft.calendrier,
+          dossier: draft.dossier,
+        },
+        classifyConfidence: draft.classify_confidence,
+        deadlineKnown: Boolean(draft.deadline),
+      })
+      const humanReview = draft.human_review || !quality.canSendDigest
+
       // 4. Dedup fingerprint strict
       //    On récupère aussi is_published + source_url pour détecter le cas
       //    d'une revivification (opp marquée dead par l'audit, mais le scraper
       //    la retrouve aujourd'hui à une URL valide → on republie).
       const { data: fpMatch } = await supabase
         .from('opportunities')
-        .select('id, is_published, source_url, mirror_urls')
+        .select('id, is_published, rejected, source_url, mirror_urls')
         .eq('fingerprint', draft.fingerprint)
         .maybeSingle()
 
@@ -135,10 +156,19 @@ export async function processRawBatch(batchSize = 50): Promise<ProcessResult> {
         const matched = fpMatch as {
           id: string
           is_published: boolean
+          rejected: boolean
           source_url: string
           mirror_urls: string[] | null
         }
         if (matched.is_published) {
+          await markDuplicate(supabase, item.id, matched.id, draft.source_url)
+          result.duplicates++
+          continue
+        }
+        // Pierre tombale : annonce écartée par curation humaine (migration 0040).
+        // On NE ressuscite JAMAIS une fiche rejetée — sa ligne existe uniquement
+        // pour que son fingerprint bloque toute recréation au scrape suivant.
+        if (matched.rejected) {
           await markDuplicate(supabase, item.id, matched.id, draft.source_url)
           result.duplicates++
           continue
@@ -148,6 +178,37 @@ export async function processRawBatch(batchSize = 50): Promise<ProcessResult> {
         // juste à une URL potentiellement différente.
         await reviveOpportunity(supabase, item.id, matched, draft.source_url)
         result.revived++
+        continue
+      }
+
+      // 5a. Dédup secondaire tolérante à la deadline.
+      //     Couvre le cas : opp déjà publiée avec deadline absente (ou
+      //     différente), puis re-scrapée avec une deadline (source mise à jour
+      //     ou backfill) sous un nouvel external_id. Le fingerprint inclut la
+      //     deadline : il diffère alors et on insérerait un doublon. On exige
+      //     même émetteur + même titre exact et des deadlines compatibles
+      //     (une absente, ou < 30 j d'écart) avant de fusionner. Les éditions
+      //     dont les deadlines divergent de > 30 j restent des opps distinctes.
+      const { data: titleMatches } = await supabase
+        .from('opportunities')
+        .select('id, deadline')
+        .eq('emitter_slug', draft.emitter_slug)
+        .eq('title', draft.title)
+        .eq('is_published', true)
+      const titleMatch = (
+        (titleMatches as Array<{ id: string; deadline: string | null }> | null) ?? []
+      ).find((m) => deadlinesCompatible(m.deadline, draft.deadline ?? null))
+      if (titleMatch) {
+        // Rafraîchit la deadline si l'existante était absente et qu'on en a
+        // une désormais (évite une fiche figée sans date).
+        if (!titleMatch.deadline && draft.deadline) {
+          await supabase
+            .from('opportunities')
+            .update({ deadline: draft.deadline, updated_at: new Date().toISOString() })
+            .eq('id', titleMatch.id)
+        }
+        await markDuplicate(supabase, item.id, titleMatch.id, draft.source_url)
+        result.duplicates++
         continue
       }
 
@@ -195,7 +256,7 @@ export async function processRawBatch(batchSize = 50): Promise<ProcessResult> {
           mirror_urls: draft.mirror_urls,
           fingerprint: draft.fingerprint,
           classify_confidence: draft.classify_confidence,
-          human_review: draft.human_review,
+          human_review: humanReview,
           // ── Champs pilote scénariste (migration 0011) ────────────────
           hors_reseau_friendly: draft.hors_reseau_friendly,
           min_films_produits: draft.min_films_produits,
@@ -266,7 +327,7 @@ async function markDuplicate(
     .eq('id', rawId)
 
   // Append l'URL source au tableau mirror_urls de l'opportunité canonique.
-  // (Ancien code utilisait un .rpc('exec_sql').catch() mort - supprimé car
+  // (Ancien code utilisait un .rpc('exec_sql').catch() mort — supprimé car
   //  le client Supabase ne supporte pas .catch() sur les thenables et
   //  l'appel n'avait de toute façon pas de SQL à exécuter.)
   const { data: existing } = await supabase
@@ -313,11 +374,13 @@ async function reviveOpportunity(
 
   await supabase
     .from('opportunities')
+    // La machine ne publie JAMAIS (invariant 2026-06-01) : on rafraîchit
+    // seulement l'URL source recouvrée, sans toucher à is_published / human_review
+    // / next_edition_status. La fiche reste dans son état (candidate / awaiting /
+    // dépubliée) ; seule la curation humaine peut (re)publier.
     .update({
-      is_published: true,
       source_url: isNewUrl ? newSourceUrl : existing.source_url,
       mirror_urls: nextMirrors,
-      human_review: false,
       updated_at: new Date().toISOString(),
     })
     .eq('id', existing.id)

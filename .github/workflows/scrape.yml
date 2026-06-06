@@ -1,0 +1,105 @@
+name: Scrape sources
+
+on:
+  schedule:
+    - cron: '15 4 * * *'   # Tous les jours à 04:15 UTC (06:15 Paris hiver, 05:15 été)
+  workflow_dispatch:
+    inputs:
+      source_slug:
+        description: 'Slug d''une source spécifique (optionnel)'
+        required: false
+        type: string
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Si workflow_dispatch avec source_slug spécifié, on n'exécute que celui-là
+        # (la filtrage se fait dans le script via --source).
+        # Sinon, on pourrait paralléliser par source ici, mais commence simple :
+        # un seul job qui boucle sur toutes les sources actives.
+        job: [all]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run scrapers
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -n "${{ inputs.source_slug }}" ]; then
+            npm run scrape:one -- ${{ inputs.source_slug }}
+          else
+            npm run scrape:all
+          fi
+
+      - name: Trigger pipeline processing
+        if: success()
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ secrets.SITE_URL }}
+        run: |
+          if [ -n "$SITE_URL" ] && [ -n "$CRON_SECRET" ]; then
+            curl -X POST "$SITE_URL/api/cron/process-raw" \
+              -H "x-cron-secret: $CRON_SECRET" \
+              -H "Content-Type: application/json" \
+              --fail-with-body || echo "Pipeline trigger failed (non-fatal)"
+          fi
+
+      - name: Enrich sections structurées (LLM via texte plein de page)
+        if: success()
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Cascade complète : Gemini Flash → Gemma → OpenRouter (DeepSeek)
+          # quand Google est dégradé. Firecrawl en fallback pour les sources
+          # JS-heavy (accordéons, SPA) que le fetch statique ne voit pas.
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+        # Limite à 30 opps/run pour borner le quota Gemini quotidien.
+        # Un seul run journalier suffit puisque le pipeline n'ajoute en
+        # moyenne que ~5-10 nouvelles opps/jour, et que --only-empty filtre
+        # déjà sur conditions/calendrier/dossier vides.
+        run: |
+          # --v1-only : restreint au scope V1 launch (scénaristes/auteurs AV).
+          # Évite de brûler la quota Gemma sur les opps hors-scope.
+          npm run enrich:sections -- --apply --v1-only --limit 30 || echo "Enrich step failed (non-fatal)"
+
+      - name: Backfill deadline depuis le calendrier
+        if: success()
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        # Tourne APRÈS enrich (qui remplit le calendrier) et AVANT le flag
+        # Beaumarchais (qui dépend de deadline). Remplit deadline avec la
+        # prochaine clôture future identifiable → tri du listing, pills
+        # d'urgence et JSON-LD applicationDeadline restent à jour.
+        run: |
+          npm run backfill:deadline -- --apply || echo "Backfill deadline failed (non-fatal)"
+
+      - name: Auto-flag Beaumarchais en awaiting_details après deadline
+        if: success()
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        # Les bourses Beaumarchais ouvrent à date fixe annuellement. Quand
+        # la deadline d'un cycle passe, le cycle suivant n'est généralement
+        # pas encore annoncé sur le site. On les flagge automatiquement
+        # awaiting_details plutôt que de les laisser dans EXPIRED.
+        run: |
+          npx tsx scripts/auto-flag-beaumarchais-end-of-cycle.ts --apply || echo "Beaumarchais auto-flag failed (non-fatal)"

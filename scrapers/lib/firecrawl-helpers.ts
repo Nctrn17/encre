@@ -1,5 +1,5 @@
 /**
- * Helpers Firecrawl - scraping JS-heavy + bypass Cloudflare.
+ * Helpers Firecrawl — scraping JS-heavy + bypass Cloudflare.
  *
  * Cas d'usage Encre :
  *   - Series Mania Institute (SPA React, contenu chargé en JS)
@@ -33,7 +33,7 @@ function getClient(): FirecrawlApp | null {
   const apiKey = process.env.FIRECRAWL_API_KEY
   if (!apiKey) {
     console.warn(
-      '  [firecrawl] FIRECRAWL_API_KEY absent - sources JS-heavy/Cloudflare ignorées',
+      '  [firecrawl] FIRECRAWL_API_KEY absent — sources JS-heavy/Cloudflare ignorées',
     )
     return null
   }
@@ -74,7 +74,7 @@ export async function firecrawlScrape(
   options: {
     /** Attendre N ms que le JS rende avant capture (default 2000) */
     waitForMs?: number
-    /** Filtrer au contenu principal (skip nav/footer) - default true */
+    /** Filtrer au contenu principal (skip nav/footer) — default true */
     onlyMainContent?: boolean
     /** Formats demandés (default html + markdown) */
     formats?: Array<'html' | 'markdown' | 'rawHtml' | 'links' | 'screenshot'>
@@ -116,7 +116,7 @@ export async function firecrawlScrape(
         url?: string
       }
     }
-    // L'API peut renvoyer la data soit à plat, soit dans .data - on gère les deux.
+    // L'API peut renvoyer la data soit à plat, soit dans .data — on gère les deux.
     const data = r.data ?? r
     return {
       html: data.html ?? '',
@@ -163,7 +163,7 @@ export async function fetchWithFirecrawlFallback(
     const fc = await firecrawlScrape(url, options)
     if (fc) return { html: fc.html, source: 'firecrawl' }
     // Si firecrawl indisponible mais qu'on a quand même un HTML standard,
-    // on le retourne - le caller décidera s'il est exploitable.
+    // on le retourne — le caller décidera s'il est exploitable.
     if (html) return { html, source: 'fetch' }
     return null
   } catch (err) {

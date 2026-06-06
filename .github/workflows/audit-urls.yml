@@ -1,0 +1,104 @@
+name: Audit source URLs
+
+on:
+  schedule:
+    - cron: '30 5 * * *'   # Tous les jours à 05:30 UTC (07:30 Paris hiver),
+                            # après le scrape (04:15) et avant les digests.
+  workflow_dispatch:
+    inputs:
+      mark_dead:
+        description: 'Marquer is_published=false sur les URLs dead'
+        required: false
+        default: true
+        type: boolean
+      with_semantic:
+        description: 'Activer le check sémantique LLM (coûte des tokens)'
+        required: false
+        default: false
+        type: boolean
+      limit:
+        description: 'Limiter à N opportunités (vide = toutes)'
+        required: false
+        type: string
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run audit
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          set -euo pipefail
+          REPORT="audit-$(date -u +%F).csv"
+          ARGS=(--output "$REPORT")
+
+          # Sur le run scheduled (pas dispatch manuel), tous les flags par défaut.
+          MARK_DEAD="${{ inputs.mark_dead }}"
+          if [ "${MARK_DEAD:-true}" = "true" ]; then
+            ARGS+=(--mark-dead)
+          fi
+
+          WITH_SEMANTIC="${{ inputs.with_semantic }}"
+          if [ "${WITH_SEMANTIC:-false}" = "true" ]; then
+            ARGS+=(--with-semantic)
+          fi
+
+          LIMIT="${{ inputs.limit }}"
+          if [ -n "$LIMIT" ]; then
+            ARGS+=(--limit "$LIMIT")
+          fi
+
+          echo "▶ npm run audit:urls -- ${ARGS[*]}"
+          npm run audit:urls -- "${ARGS[@]}"
+
+          # Stats sommaires dans le step summary
+          if [ -f "$REPORT" ]; then
+            TOTAL=$(($(wc -l < "$REPORT") - 1))
+            DEAD=$(awk -F, 'NR>1 && $4=="dead"' "$REPORT" | wc -l)
+            DRIFT=$(awk -F, 'NR>1 && $4=="semantic_drift"' "$REPORT" | wc -l)
+            UNKNOWN=$(awk -F, 'NR>1 && $4=="unknown"' "$REPORT" | wc -l)
+            OK=$(awk -F, 'NR>1 && $4=="ok"' "$REPORT" | wc -l)
+
+            {
+              echo "## Audit URLs · $(date -u +'%F %H:%MZ')"
+              echo ""
+              echo "| Verdict | Count |"
+              echo "| --- | ---: |"
+              echo "| ok | $OK |"
+              echo "| dead | $DEAD |"
+              echo "| semantic_drift | $DRIFT |"
+              echo "| unknown | $UNKNOWN |"
+              echo "| **total** | **$TOTAL** |"
+              echo ""
+              if [ "$DEAD" -gt 0 ] || [ "$DRIFT" -gt 0 ]; then
+                echo "⚠ ${DEAD} URLs dead + ${DRIFT} drifts détectés. Voir l'artifact CSV."
+              else
+                echo "✓ Aucune anomalie."
+              fi
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-report-${{ github.run_id }}
+          path: audit-*.csv
+          retention-days: 30
+          if-no-files-found: warn

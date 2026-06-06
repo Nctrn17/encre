@@ -8,7 +8,7 @@ import { getSiteUrl } from '@/lib/site'
 
 /**
  * <changefreq> et <priority> sont ignorés par Google (et la plupart des
- * moteurs) - on ne les émet pas. <lastmod> n'est posé que là où on a une vraie
+ * moteurs) — on ne les émet pas. <lastmod> n'est posé que là où on a une vraie
  * date de contenu : par fiche (updated_at DB) et, pour les pages d'agrégation
  * pilotées par les données, la date du dernier item modifié. Les pages
  * éditoriales/légales n'ont pas de lastmod : un lastmod faux (le timestamp de

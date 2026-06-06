@@ -13,6 +13,8 @@ import { filterOpportunitiesSinceLastSent } from '@/features/alerts/matchers'
 import { readOpportunityForProfile } from '@/features/personalization/match'
 import type { AlertProfile } from '@/features/alerts/queries'
 import type { Opportunity } from '@/lib/supabase/types'
+import { fetchPilotOpportunityPool } from './opportunity-pool'
+import { isoWeekdayInParis } from './weekday'
 import {
   renderDigestHtml,
   renderDigestText,
@@ -117,18 +119,11 @@ export async function buildPendingDigests(
   diagnostics.users_resolved = emailMap.size
   log(`[build-digest] emails résolus : ${diagnostics.users_resolved}/${userIds.length}`)
 
-  // 3. Pool d'opportunités candidates : publiées, non expirées, is_published
-  const { data: allOpps, error: oppsError } = await supabase
-    .from('opportunities')
-    .select('*')
-    .eq('is_published', true)
-    .eq('human_review', false)
-    .or(`deadline.is.null,deadline.gt.${new Date().toISOString()}`)
-    .order('published_at', { ascending: false })
-    .limit(1000)
-
-  if (oppsError) throw oppsError
-  const opps = (allOpps ?? []) as Opportunity[]
+  // 3. Pool d'opportunités candidates (scope V1 = mêmes exclusions que /aides).
+  // Source unique partagée avec le broadcast waitlist (cf. opportunity-pool.ts).
+  // Le filtrage producteur/éditeur reste DÉLÉGUÉ au matcher par profil (un user
+  // avec producteur opt-in doit recevoir ces aides).
+  const opps: Opportunity[] = await fetchPilotOpportunityPool(supabase)
   diagnostics.opportunities_pool = opps.length
   log(`[build-digest] pool opportunités : ${diagnostics.opportunities_pool}`)
 
@@ -154,13 +149,26 @@ export async function buildPendingDigests(
     const matches: DigestOpportunity[] = filterOpportunitiesSinceLastSent(
       opps,
       filteringProfile,
-      { logRejections: options.verbose },
+      { logRejections: options.verbose, now: options.now },
     )
       .slice(0, maxItems)
-      .map((opportunity) => ({
-        ...opportunity,
-        matchReading: readOpportunityForProfile(opportunity, profile),
-      }))
+      .map((opportunity) => {
+        // Une fiche publiée AVANT le dernier envoi n'est entrée dans la
+        // sélection que par la porte « ferme bientôt » → on la tague comme
+        // rappel d'échéance (badge dans le template). Sinon c'est une nouveauté.
+        const sinceTs = filteringProfile.last_sent_at
+          ? Date.parse(filteringProfile.last_sent_at)
+          : null
+        const reminderReason: 'new' | 'closing_soon' =
+          sinceTs !== null && Date.parse(opportunity.published_at) <= sinceTs
+            ? 'closing_soon'
+            : 'new'
+        return {
+          ...opportunity,
+          matchReading: readOpportunityForProfile(opportunity, profile),
+          reminderReason,
+        }
+      })
     log(`[build-digest] profil "${profile.name}" : ${matches.length} matches`)
     if (options.verbose) {
       log(
@@ -195,7 +203,8 @@ export async function buildPendingDigests(
 
     const html = renderDigestHtml(ctx)
     const text = renderDigestText(ctx)
-    const subject = buildSubject(profile.name, matches.length)
+    const soonCount = matches.filter((m) => m.reminderReason === 'closing_soon').length
+    const subject = buildSubject(profile.name, matches.length - soonCount, soonCount)
 
     payloads.push({
       profile,
@@ -210,28 +219,22 @@ export async function buildPendingDigests(
   return { payloads, diagnostics }
 }
 
-function buildSubject(profileName: string, count: number): string {
-  if (count === 1) return `1 nouvelle opportunité · ${profileName}`
-  return `${count} nouvelles opportunités · ${profileName}`
-}
-
-function isoWeekdayInParis(date: Date): number {
-  const weekday = new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
-    timeZone: 'Europe/Paris',
-  }).format(date)
-
-  const weekdays: Record<string, number> = {
-    Mon: 1,
-    Tue: 2,
-    Wed: 3,
-    Thu: 4,
-    Fri: 5,
-    Sat: 6,
-    Sun: 7,
+function buildSubject(profileName: string, newCount: number, soonCount: number): string {
+  const total = newCount + soonCount
+  // Que des nouveautés.
+  if (soonCount === 0) {
+    return total === 1
+      ? `1 nouvelle opportunité · ${profileName}`
+      : `${total} nouvelles opportunités · ${profileName}`
   }
-
-  return weekdays[weekday] ?? 1
+  // Que des rappels d'échéance.
+  if (newCount === 0) {
+    return soonCount === 1
+      ? `1 opportunité ferme bientôt · ${profileName}`
+      : `${soonCount} opportunités ferment bientôt · ${profileName}`
+  }
+  // Mélange des deux : on ne ment pas en disant « nouvelles ».
+  return `${total} opportunités à suivre · ${profileName}`
 }
 
 /**

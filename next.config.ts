@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
+    const isDev = process.env.NODE_ENV !== 'production'
     return [
       {
         source: '/(.*)',
@@ -22,6 +23,28 @@ const nextConfig: NextConfig = {
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+          },
+          {
+            // Defense-in-depth. 'unsafe-inline' sur script-src est requis par
+            // les scripts inline de Next (hydratation/streaming) et les blocs
+            // JSON-LD ; on resserre tout le reste (frame-ancestors, object-src,
+            // base-uri, form-action) et on force le HTTPS. 'unsafe-eval' n'est
+            // ajouté qu'en dev (React l'exige pour ses outils de debug ; jamais
+            // en prod).
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://va.vercel-scripts.com`,
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https:",
+              "font-src 'self' data:",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+              "frame-ancestors 'none'",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              'upgrade-insecure-requests',
+            ].join('; '),
           },
         ],
       },

@@ -89,6 +89,14 @@ export default async function CurationPage({
       )}
 
       <QueueSection
+        title="À publier"
+        accent="vermillion"
+        description="Drafts jamais publiés, créés récemment. Depuis « la machine ne publie jamais », c'est ici qu'on relit puis publie manuellement une fiche fraîchement ingérée. Le backlog ancien des dépubliées s'audite à part."
+        items={queues.aPublier.map((opp) => ({ opp }))}
+        focusId={focusId}
+      />
+
+      <QueueSection
         title="À valider"
         accent="vermillion"
         description="Opps bloquées avant diffusion. Une sauvegarde depuis cette page vaut validation humaine et les rend éligibles au digest si elles restent publiées."
@@ -205,6 +213,7 @@ function buildWorkQueue(queues: Awaited<ReturnType<typeof getCurationQueues>>): 
     }
   }
 
+  push(queues.aPublier, 'À publier : draft propre jamais publié. Relire puis publier manuellement.')
   push(queues.partialExtraction, 'À décider : sections manquantes. Enrichir, flagger en attente, ou dépublier.')
   push(queues.humanReview, 'À valider : bloquée avant diffusion.')
   push(queues.expired, 'À décider : deadline passée. Dépublier ou attente prochaine édition.')

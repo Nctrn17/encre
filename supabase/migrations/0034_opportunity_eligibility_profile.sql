@@ -1,5 +1,5 @@
 -- ============================================================================
--- Migration 0034 - éligibilité structurée des opportunités
+-- Migration 0034 — éligibilité structurée des opportunités
 -- ============================================================================
 --
 -- Objectif : sortir les critères d'éligibilité sensibles du mélange

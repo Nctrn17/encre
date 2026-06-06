@@ -1,6 +1,6 @@
 import { OpportunityDraftSchema, type RawItemPayload, type ClassificationOutput } from './schemas'
 import { computeFingerprint, generateOpportunitySlug } from './fingerprint'
-import { slugify } from '@/lib/utils'
+import { slugify, stripLongDashes } from '@/lib/utils'
 import type { OpportunityDraft } from './schemas'
 import { extractEligibility } from './eligibility'
 
@@ -24,10 +24,13 @@ export function normalizeRawItem(params: {
 }): OpportunityDraft | null {
   const { payload, classification, sourceSlug } = params
 
-  const title = payload.title?.trim()
-  if (!title || title.length < 3) return null
+  const rawTitle = payload.title?.trim()
+  if (!rawTitle || rawTitle.length < 3) return null
+  // Normalise les tirets longs dès l'ingestion (titre, émetteur, sections…)
+  // pour qu'aucune opp n'en stocke jamais (règle produit, cf. stripLongDashes).
+  const title = stripLongDashes(rawTitle)
 
-  const emitter = payload.emitter?.trim() || inferEmitterFromSource(sourceSlug)
+  const emitter = stripLongDashes(payload.emitter?.trim() || inferEmitterFromSource(sourceSlug))
   const emitterSlug = slugify(emitter)
 
   const description = cleanDescription(payload.description)
@@ -80,11 +83,14 @@ export function normalizeRawItem(params: {
     human_review: classification.confidence < 0.6,
     // Sections structurées extraites par le LLM (migration 0018).
     // Empty arrays par défaut si la classification ne les a pas remplies.
-    conditions: classification.conditions ?? [],
-    calendrier: classification.calendrier ?? [],
-    dossier: classification.dossier ?? [],
+    conditions: (classification.conditions ?? []).map(stripLongDashes),
+    calendrier: (classification.calendrier ?? []).map(stripLongDashes),
+    dossier: (classification.dossier ?? []).map(stripLongDashes),
     ...pilotFields,
     ...eligibility,
+    eligibility_summary: eligibility.eligibility_summary
+      ? stripLongDashes(eligibility.eligibility_summary)
+      : eligibility.eligibility_summary,
   }
 
   const parsed = OpportunityDraftSchema.safeParse(draft)
@@ -102,7 +108,7 @@ function cleanDescription(desc: string | null | undefined): string | null {
     .replace(/[<][^>]*[>]/g, '') // strip remaining HTML
     .trim()
   if (trimmed.length < 10) return null
-  return trimmed.slice(0, 10000)
+  return stripLongDashes(trimmed.slice(0, 10000))
 }
 
 function parseDeadline(raw: string | null | undefined): string | null {
@@ -196,7 +202,7 @@ function parseRegion(
   if (CODE_MAP[upperHint]) return CODE_MAP[upperHint]
   if (upperHint.startsWith('FR-') && upperHint.length <= 10) return upperHint
 
-  // Cas 2 : nom en français - ancien mapping
+  // Cas 2 : nom en français — ancien mapping
   const map: Record<string, string> = {
     'grand est': 'FR-GES',
     'grand-est': 'FR-GES',
@@ -276,13 +282,13 @@ export function extractPilotFields(params: {
     ? rawJson.hint_age_max
     : undefined
 
-  // Inférence fallback - patterns FR de fermeture hors-réseau
+  // Inférence fallback — patterns FR de fermeture hors-réseau
   const requiresProducerInferred =
     /entreprises?\s+de\s+production/i.test(text) ||
     /société\s+de\s+production|producteur\s+(?:obligatoire|requis|attaché)|portée?\s+par\s+(?:un|une|le|la)\s+producteur/i.test(text) ||
     /(?:sociétaire\s+sacd|dans\s+le\s+cadre\s+d'une\s+société\s+de\s+production)/i.test(text)
 
-  // Inférence fallback - patterns FR exigence d'éditeur (migration 0019)
+  // Inférence fallback — patterns FR exigence d'éditeur (migration 0019)
   // Couvre : aides destinées aux maisons d'édition (CNL, régions),
   //          candidature déposée par l'éditeur, livre déjà publié, etc.
   const requiresEditorInferred =
@@ -301,13 +307,13 @@ export function extractPilotFields(params: {
       ? hintHorsReseau
       : !(requiresProducerInferred || requiresEditorInferred)
 
-  // Age max - regex "moins de XX ans"
+  // Age max — regex "moins de XX ans"
   const ageMatch = text.match(/moins\s+de\s+(\d{2})\s+ans|(\d{2})\s+ans\s+(?:ou\s+moins|maximum)/i)
   const ageMaxInferred = ageMatch
     ? Number.parseInt(ageMatch[1] ?? ageMatch[2], 10)
     : null
 
-  // Min films produits - indices rares dans le texte
+  // Min films produits — indices rares dans le texte
   const isFirstTimer = /premier\s+(?:court|long|film|projet)|1er\s+(?:court|long|film)|débutant|émergent|jamais\s+produit/i.test(text)
   const minFilmsInferred = hintMinFilms !== undefined ? hintMinFilms : isFirstTimer ? 0 : null
 
@@ -324,13 +330,13 @@ export function extractPilotFields(params: {
   // au niveau discipline, on n'auto-tag PAS serie / documentaire / scenario
   // depuis le texte. Cas typique : la bourse Photographe Lagardère 2026 dont
   // la description mentionne « projet photographique […] (reportage, série,
-  // documentaire visuel) » - le mot « série » désigne ici un objet photo,
+  // documentaire visuel) » — le mot « série » désigne ici un objet photo,
   // pas un format AV. Sans ce garde-fou on remonte la bourse photo dans le
   // listing pilote scénariste, ce qui pollue la V1.
   const visualOnlyContext =
     disciplines.includes('photographie') ||
-    disciplines.includes('arts-visuels') ||
-    disciplines.includes('photo')
+    disciplines.includes('arts_visuels') ||
+    disciplines.includes('arts_plastiques')
 
   if (!visualOnlyContext) {
     if (/scénario/i.test(text)) tags.add('scenario')
@@ -339,7 +345,7 @@ export function extractPilotFields(params: {
   if (/court(?:-|\s+)?métrage/i.test(text)) tags.add('court-metrage')
   if (/long(?:-|\s+)?métrage/i.test(text)) tags.add('long-metrage')
 
-  // Séries - détection large : « série » seul, mini-série, feuilleton,
+  // Séries — détection large : « série » seul, mini-série, feuilleton,
   // série d'animation, websérie, fiction sérielle, unitaire (90 min).
   // Évite « série de bourses » / « série de prix » (faux positifs).
   const seriePattern =
@@ -350,14 +356,14 @@ export function extractPilotFields(params: {
     tags.add('serie')
   }
 
-  // Bible de série - document fondateur (personnages, arche, ton).
+  // Bible de série — document fondateur (personnages, arche, ton).
   // Spécifique au workflow scénariste TV/streaming.
   if (!visualOnlyContext && /\bbible\s+(?:de\s+)?séri|bible[\s-]?série|série\s+(?:et|avec)\s+bible|écriture\s+(?:de\s+la\s+)?bible|développement\s+(?:de\s+la\s+)?bible/i.test(text)) {
     tags.add('bible')
     tags.add('serie')
   }
 
-  // Pilote TV - épisode pilote, pitch série, concept série
+  // Pilote TV — épisode pilote, pitch série, concept série
   if (!visualOnlyContext && /\bpilote\s+(?:de\s+)?(?:série|fiction|tv|télé)|épisode\s+pilote|écriture\s+(?:du\s+)?pilote|pitch\s+(?:de\s+)?séri/i.test(text)) {
     tags.add('pilote-tv')
     tags.add('serie')
@@ -369,7 +375,7 @@ export function extractPilotFields(params: {
   if (/roman\b|poésie|essai\b|nouvelle\b/i.test(text)) tags.add('litterature')
   if (/théâtre/i.test(text)) tags.add('theatre')
 
-  // Pays du Sud - éligibilité réservée aux créateurs des pays
+  // Pays du Sud — éligibilité réservée aux créateurs des pays
   // francophones du Sud (zone OIF / TV5MONDE+). On capte la mention
   // explicite, le nom des fonds majeurs, et les listes-pays types.
   // Volontairement strict pour éviter les faux positifs sur les opps FR
@@ -380,7 +386,7 @@ export function extractPilotFields(params: {
     tags.add('pays-du-sud')
   }
 
-  // Formation - programmes pédagogiques (compagnonnage, writers' room,
+  // Formation — programmes pédagogiques (compagnonnage, writers' room,
   // résidence-école, atelier de formation). Distinct des résidences
   // de pure création.
   const formationPattern =
@@ -389,7 +395,7 @@ export function extractPilotFields(params: {
     tags.add('formation')
   }
 
-  // Outre-mer - deux cas distincts qui méritent tous les deux le tag :
+  // Outre-mer — deux cas distincts qui méritent tous les deux le tag :
   //   1. Aides spécifiquement ouvertes (ou réservées en priorité) aux
   //      auteurs ultra-marins.
   //   2. Aides métropolitaines qui couvrent transport/logement pour les
@@ -397,7 +403,7 @@ export function extractPilotFields(params: {
   //      le ticket d'avion + un mois d'hébergement à Paris exclut de fait
   //      la majorité des candidats DROM-COM).
   // Les territoires individuels (Guadeloupe, Martinique, etc.) en mention
-  // simple ne suffisent PAS - il faut un cadre d'éligibilité ou d'aide.
+  // simple ne suffisent PAS — il faut un cadre d'éligibilité ou d'aide.
   const outremerEligibilityPattern =
     /(?:réservée?s?|destinée?s?|prioritaires?|ouverte?s?|accessibles?|exclusivement|principalement|habitants?)[^.]{0,80}(?:ultra[\s-]?marins?|ultramarins?|d['']outre[\s-]?mer|outre[\s-]?mer|territoires?\s+ultramarins?|drom|guadeloupéens?|martiniquais|guyanais|réunionnais|mahorais|calédoniens?|polynésiens?|antillais)/i
   const outremerEligibilityTerritoriesPattern =
@@ -415,7 +421,7 @@ export function extractPilotFields(params: {
     tags.add('outremer')
   }
 
-  // Audience non-auteur - aides destinées à des producteurs, distributeurs,
+  // Audience non-auteur — aides destinées à des producteurs, distributeurs,
   // exploitants (salles), techniques (effets visuels), agréments investissements.
   // Toutes ces aides peuvent être correctement taguées « cinéma » ou
   // « audiovisuel » au niveau discipline, mais elles sont structurellement
@@ -424,7 +430,7 @@ export function extractPilotFields(params: {
   //
   // Exemple concret : « Aide aux moyens techniques : collège tournage »,
   // « Aide sélective à la petite et moyenne exploitation », « Agrément des
-  // investissements » - tous CNC, tous cinéma, tous inutiles pour le pilote.
+  // investissements » — tous CNC, tous cinéma, tous inutiles pour le pilote.
   // Pattern à 2 niveaux pour réduire les faux positifs :
   //   - amorce  : « aide », « fonds », « dispositif », « soutien »,
   //               « programme », « agrément »

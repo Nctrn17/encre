@@ -1,5 +1,16 @@
 import { describe, it, expect } from 'vitest'
-import { slugify, formatAmount, humanDeadline, daysUntil } from '../src/lib/utils'
+import { slugify, formatAmount, humanDeadline, daysUntil, stripLongDashes } from '../src/lib/utils'
+
+describe('stripLongDashes', () => {
+  it('replaces em-dash, en-dash and minus sign with a short hyphen', () => {
+    expect(stripLongDashes('CTG Guyane — Aide à l’écriture')).toBe('CTG Guyane - Aide à l’écriture')
+    expect(stripLongDashes('2014–2020')).toBe('2014-2020')
+    expect(stripLongDashes('J−5')).toBe('J-5')
+  })
+  it('leaves text without long dashes untouched', () => {
+    expect(stripLongDashes('Bourse SCAM, premier court')).toBe('Bourse SCAM, premier court')
+  })
+})
 
 describe('slugify', () => {
   it('lowercases and replaces spaces', () => {
@@ -15,7 +26,7 @@ describe('slugify', () => {
   })
 
   it('removes leading/trailing dashes', () => {
-    expect(slugify(' - Hello - ')).toBe('hello')
+    expect(slugify(' — Hello — ')).toBe('hello')
   })
 })
 
@@ -28,7 +39,8 @@ describe('formatAmount', () => {
 
   it('formats a range', () => {
     const result = formatAmount(5000, 30000)
-    expect(result).toContain('–')
+    expect(result).toContain(' à ')
+    expect(result).not.toMatch(/[—–−]/) // jamais de tiret long
   })
 
   it('uses "à partir de" for min only', () => {

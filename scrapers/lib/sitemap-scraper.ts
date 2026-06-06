@@ -181,7 +181,7 @@ export function extractMetaFromDetail(html: string): MetaExtract | null {
   const pageTitle = $('title').first().text().trim()
   const h1 = $('h1').first().text().trim()
 
-  // Nettoie les suffixes génériques "| Site" ou " - Site"
+  // Nettoie les suffixes génériques "| Site" ou " — Site"
   const title = (ogTitle || twitterTitle || h1 || pageTitle || '')
     .replace(/\s*[|—-]\s*[^|—-]*$/, '')
     .replace(/\s+/g, ' ')

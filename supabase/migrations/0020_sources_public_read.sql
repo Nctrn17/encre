@@ -1,4 +1,4 @@
--- Migration 0020 - RLS public-read sur la table sources
+-- Migration 0020 — RLS public-read sur la table sources
 --
 -- Bug en prod : la page /sources affichait "0 émetteurs actifs" alors que
 -- 23 sources sont en base. Cause : la policy RLS originale (0003) ne
@@ -7,7 +7,7 @@
 -- client anon (createPublicClient).
 --
 -- Fix : ajouter une policy SELECT publique restreinte aux sources actives
--- (is_active = true) - ce sont des infos publiques (transparence sur les
+-- (is_active = true) — ce sont des infos publiques (transparence sur les
 -- émetteurs suivis). Les autres colonnes sensibles (config JSON contenant
 -- éventuellement des clés API ou secrets de scraping) ne sont pas couvertes
 -- ici car le SELECT * sur sources renvoie toutes les colonnes : on accepte

@@ -133,7 +133,7 @@ async function main() {
 
   console.log(`\n=== ${changedCount} / ${opps.length} opps with diffs ===`)
   if (!apply && changedCount > 0) {
-    console.log(`(Dry-run - pass --apply to execute the updates.)`)
+    console.log(`(Dry-run — pass --apply to execute the updates.)`)
   }
 }
 

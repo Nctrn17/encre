@@ -1,9 +1,9 @@
 #!/usr/bin/env tsx
 /**
- * Reclassify - re-classification LLM des opportunités à confidence basse.
+ * Reclassify — re-classification LLM des opportunités à confidence basse.
  *
  * Cible toutes les opportunités avec `classify_confidence < threshold`
- * (défaut 0.6 - le seuil human_review du pipeline). Pour chacune, retrouve
+ * (défaut 0.6 — le seuil human_review du pipeline). Pour chacune, retrouve
  * le raw_item d'origine via `source_url`, appelle Gemma 4 31B, et met à jour
  * `type / disciplines / audience / geo_scope / classify_confidence /
  * human_review` en DB.
@@ -106,7 +106,7 @@ async function main() {
 
   const opportunities = (opps ?? []) as OpportunityRow[]
   if (opportunities.length === 0) {
-    console.log('✓ Aucune opportunité sous le seuil - rien à faire.')
+    console.log('✓ Aucune opportunité sous le seuil — rien à faire.')
     return
   }
 
@@ -115,7 +115,7 @@ async function main() {
 
   if (dryRun) {
     for (const opp of opportunities.slice(0, 10)) {
-      console.log(`  • [${opp.classify_confidence}] ${opp.title.slice(0, 70)} - ${opp.emitter}`)
+      console.log(`  • [${opp.classify_confidence}] ${opp.title.slice(0, 70)} — ${opp.emitter}`)
     }
     if (opportunities.length > 10) console.log(`  … et ${opportunities.length - 10} autres`)
     console.log('\n[dry-run] aucun appel LLM, aucune écriture DB.')
@@ -150,7 +150,7 @@ async function main() {
       try {
         classification = await classifyOpportunity(payload, opp.emitter)
       } catch (err) {
-        console.warn(`  ✗ LLM échec [${opp.title.slice(0, 50)}] - ${(err as Error).message}`)
+        console.warn(`  ✗ LLM échec [${opp.title.slice(0, 50)}] — ${(err as Error).message}`)
         llmFailed++
         await sleep(THROTTLE_MS)
         continue
@@ -170,7 +170,7 @@ async function main() {
         .eq('id', opp.id)
 
       if (updErr) {
-        console.warn(`  ✗ DB update échec [${opp.title.slice(0, 50)}] - ${updErr.message}`)
+        console.warn(`  ✗ DB update échec [${opp.title.slice(0, 50)}] — ${updErr.message}`)
         errors++
       } else {
         updated++
@@ -186,7 +186,7 @@ async function main() {
         }
       }
     } catch (err) {
-      console.warn(`  ✗ erreur inattendue [${opp.title.slice(0, 50)}] - ${(err as Error).message}`)
+      console.warn(`  ✗ erreur inattendue [${opp.title.slice(0, 50)}] — ${(err as Error).message}`)
       errors++
     }
 

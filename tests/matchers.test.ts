@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { matchOpportunity, filterOpportunitiesByProfile } from '../src/features/alerts/matchers'
+import {
+  matchOpportunity,
+  filterOpportunitiesByProfile,
+  filterOpportunitiesSinceLastSent,
+} from '../src/features/alerts/matchers'
 import type { AlertProfile } from '../src/features/alerts/queries'
 import type { Opportunity } from '../src/lib/supabase/types'
 
@@ -62,6 +66,44 @@ function makeProfile(overrides: Partial<AlertProfile> = {}): AlertProfile {
     ...overrides,
   }
 }
+
+describe('filterOpportunitiesSinceLastSent — rappel « ferme bientôt »', () => {
+  const NOW = new Date('2026-06-20T12:00:00Z')
+  // Publiée AVANT le dernier envoi → plus « nouvelle ».
+  const oldPublished = { published_at: '2026-04-18T10:00:00+02:00' }
+  const sentRecently = { last_sent_at: '2026-05-01T10:00:00+02:00' }
+
+  it('hebdo : rappelle une fiche déjà envoyée dont la deadline est ≤ 14 j', () => {
+    const opp = makeOpp({ ...oldPublished, deadline: '2026-06-25T23:59:00+02:00' })
+    const profile = makeProfile({ frequency: 'weekly', ...sentRecently })
+    const result = filterOpportunitiesSinceLastSent([opp], profile, { now: NOW })
+    expect(result).toHaveLength(1)
+  })
+
+  it('hebdo : ne rappelle PAS une fiche dont la deadline est > 14 j', () => {
+    const opp = makeOpp({ ...oldPublished, deadline: '2026-07-30T23:59:00+02:00' })
+    const profile = makeProfile({ frequency: 'weekly', ...sentRecently })
+    const result = filterOpportunitiesSinceLastSent([opp], profile, { now: NOW })
+    expect(result).toHaveLength(0)
+  })
+
+  it('quotidien : pas de rappel deadline (anti-spam, réservé à l’hebdo)', () => {
+    const opp = makeOpp({ ...oldPublished, deadline: '2026-06-25T23:59:00+02:00' })
+    const profile = makeProfile({ frequency: 'daily', ...sentRecently })
+    const result = filterOpportunitiesSinceLastSent([opp], profile, { now: NOW })
+    expect(result).toHaveLength(0)
+  })
+
+  it('une fiche nouvelle depuis le dernier envoi passe quelle que soit la deadline', () => {
+    const opp = makeOpp({
+      published_at: '2026-06-19T10:00:00+02:00',
+      deadline: '2026-12-30T23:59:00+02:00',
+    })
+    const profile = makeProfile({ frequency: 'weekly', ...sentRecently })
+    const result = filterOpportunitiesSinceLastSent([opp], profile, { now: NOW })
+    expect(result).toHaveLength(1)
+  })
+})
 
 describe('matchOpportunity', () => {
   it('matches everything when profile has no criteria', () => {

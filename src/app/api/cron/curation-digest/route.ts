@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { checkCronSecret } from '@/lib/cron-auth'
 import { getCurationQueues, queuesHaveContent } from '@/features/curation/queues'
 import { renderCurationDigest, sendCurationDigest } from '@/features/curation/digest'
 
@@ -19,10 +20,8 @@ export const maxDuration = 60
  * Branché à GitHub Actions scheduled workflow .github/workflows/curation-digest.yml.
  */
 export async function POST(request: Request) {
-  const secret = request.headers.get('x-cron-secret')
-  if (!secret || secret !== process.env.CRON_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const unauthorized = checkCronSecret(request)
+  if (unauthorized) return unauthorized
 
   const url = new URL(request.url)
   const preview = url.searchParams.get('preview') === '1'
@@ -72,7 +71,11 @@ export async function POST(request: Request) {
 
     const to = process.env.CURATION_DIGEST_TO
     if (!to) {
-      return NextResponse.json({ ok: false, error: 'CURATION_DIGEST_TO not configured' }, { status: 500 })
+      return NextResponse.json({
+        ok: false,
+        sent: false,
+        reason: 'CURATION_DIGEST_TO non configuré',
+      })
     }
     const from = process.env.RESEND_FROM_EMAIL
     await sendCurationDigest(digest, { to, apiKey, from })

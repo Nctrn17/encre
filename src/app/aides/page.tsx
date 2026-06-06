@@ -6,7 +6,12 @@ import { OpportunityFiltersBar } from '@/components/opportunities/OpportunityFil
 import { OpportunitySearchInput } from '@/components/opportunities/SearchInput'
 import type { Opportunity } from '@/lib/supabase/types'
 import { labelForRegion } from '@/lib/region-codes'
-import { PILOT_SCENARISTE_TAGS, LISTING_DEFAULT_EXCLUDE_TAGS } from '@/lib/pilot-defaults'
+import {
+  PILOT_SCENARISTE_TAGS,
+  LISTING_DEFAULT_EXCLUDE_TAGS,
+  LISTING_DEFAULT_SANS_PRODUCTEUR,
+  LISTING_DEFAULT_SANS_EDITEUR,
+} from '@/lib/pilot-defaults'
 import { absoluteUrl } from '@/lib/site'
 import { logSearchQuery } from '@/features/search/log'
 
@@ -16,7 +21,7 @@ import { logSearchQuery } from '@/features/search/log'
  *
  * Layout : sidebar 220px (filtres URL-piloted) + main (list-head + liste plate
  * triée par deadline + pagination). Pas de hero, pas de strip, pas de groupes
- * de bucket - la liste est dominante visuellement.
+ * de bucket — la liste est dominante visuellement.
  */
 
 // Rendu dynamique : total + liste lus en live (cohérence avec le compteur
@@ -34,7 +39,7 @@ export async function generateMetadata({
   const baseTitle = `Bourses et résidences d'écriture ${year} · le registre`
   return {
     title: isPaginated ? `${baseTitle} · page ${pageNum}` : baseTitle,
-    description: `Bourses, résidences d'écriture, appels à projets et prix pour scénaristes et auteurs. Liste complète des aides ouvertes en ${year}, classée par date limite. Mise à jour quotidienne.`,
+    description: `Bourses, résidences d'écriture, appels à projets et prix pour scénaristes, autrices et auteurs. Liste complète des aides ouvertes en ${year}, classée par date limite. Mise à jour quotidienne.`,
     alternates: { canonical: '/aides' },
     robots: isPaginated
       ? { index: false, follow: true }
@@ -67,20 +72,29 @@ interface PageProps {
 export default async function OpportunitesPage({ searchParams }: PageProps) {
   const params = await searchParams
   const page = Number.parseInt(params.page ?? '1', 10)
-  const limit = 40
-  const offset = (page - 1) * limit
+  const PAGE_SIZE = 40
+  // Le filtrage final (deadline + flags pilote) se fait côté page, APRÈS fetch.
+  // Pour que total / pagination / numérotation restent alignés, on récupère
+  // tout le périmètre (quelques dizaines à quelques centaines de lignes) puis
+  // on filtre et on pagine sur le résultat filtré. FETCH_LIMIT borne par
+  // sécurité (le catalogue complet ~quelques centaines reste sous ce plafond).
+  const FETCH_LIMIT = 1000
 
   const userTypes = toArray(params.type)
   const userTags = toArray(params.tag)
   const userRegions = toArray(params.region)
   const userDisciplineMacro = toArray(params.discipline)
   const deadlineBucket = params.d ?? null
-  // V1 launch (cible : jeunes auteurs hors-réseau) - par défaut on filtre
+  // V1 launch (cible : jeunes auteurs hors-réseau) — par défaut on filtre
   // les opps qui requièrent un producteur ou un éditeur, structurellement
   // hors cible. URL `?np=0` ou `?ne=0` permet d'opt-out du filtre pour
   // les rares users qui ont ces relations professionnelles établies.
-  const sansProducteur = params.np !== '0'
-  const sansEditeur = params.ne !== '0'
+  // Défauts issus de la source unique partagée avec le compteur de la home
+  // (LISTING_DEFAULT_SANS_*). Param absent → défaut ; `0` → toggle désactivé.
+  const sansProducteur =
+    params.np === undefined ? LISTING_DEFAULT_SANS_PRODUCTEUR : params.np !== '0'
+  const sansEditeur =
+    params.ne === undefined ? LISTING_DEFAULT_SANS_EDITEUR : params.ne !== '0'
   const premierProjet = params.pp === '1'
   const search = params.q ?? null
   const pilotBypass = userDisciplineMacro.includes('all')
@@ -95,11 +109,11 @@ export default async function OpportunitesPage({ searchParams }: PageProps) {
         ? undefined
         : [...PILOT_SCENARISTE_TAGS]
 
-  const { items, total } = await listOpportunities({
+  const { items } = await listOpportunities({
     types: userTypes.length > 0 ? userTypes : undefined,
     disciplinesTagsAny,
     // Exclusions par défaut du listing (source unique partagée avec le
-    // compteur de la home - cf. LISTING_DEFAULT_EXCLUDE_TAGS).
+    // compteur de la home — cf. LISTING_DEFAULT_EXCLUDE_TAGS).
     // Bypass via ?discipline=all pour voir le catalogue complet.
     disciplinesTagsExclude: pilotBypass
       ? undefined
@@ -110,21 +124,25 @@ export default async function OpportunitesPage({ searchParams }: PageProps) {
         : undefined,
     regionCodes: userRegions.length > 0 ? userRegions : undefined,
     search,
-    limit,
-    offset,
+    limit: FETCH_LIMIT,
+    offset: 0,
     includeExpired: false, // liste = uniquement opps ouvertes
   })
 
-  // Filtrage post-fetch sur deadline + flags pilote
-  const filtered = applyClientFilters(items, {
+  // Filtrage post-fetch sur deadline + flags pilote, sur TOUT le périmètre.
+  const allFiltered = applyClientFilters(items, {
     deadlineBucket,
     sansProducteur,
     sansEditeur,
     premierProjet,
   })
 
-  const filteredTotal = filtered.length
-  const totalPages = Math.ceil(total / limit)
+  const filteredTotal = allFiltered.length
+  const totalPages = Math.max(1, Math.ceil(filteredTotal / PAGE_SIZE))
+  const pageOffset = (page - 1) * PAGE_SIZE
+  // Découpe de la page courante APRÈS filtrage → numéros continus 1…N, sans
+  // trou (le découpage serveur produisait des n° basés sur le total non filtré).
+  const filtered = allFiltered.slice(pageOffset, pageOffset + PAGE_SIZE)
   const lastUpdate = items[0]?.updated_at
     ? formatLastUpdate(new Date(items[0].updated_at))
     : null
@@ -150,10 +168,10 @@ export default async function OpportunitesPage({ searchParams }: PageProps) {
     '@type': 'ItemList',
     name: "Le registre des aides à l'écriture · Encre",
     url: absoluteUrl('/aides'),
-    numberOfItems: total,
-    itemListElement: filtered.slice(0, 50).map((opp, i) => ({
+    numberOfItems: filteredTotal,
+    itemListElement: allFiltered.slice(0, 50).map((opp, i) => ({
       '@type': 'ListItem',
-      position: offset + i + 1,
+      position: i + 1,
       url: absoluteUrl(`/aides/${opp.slug}`),
       name: opp.title,
     })),
@@ -183,8 +201,8 @@ export default async function OpportunitesPage({ searchParams }: PageProps) {
         </Suspense>
 
         <ListHead
-          shown={filteredTotal}
-          total={total}
+          shown={filtered.length}
+          total={filteredTotal}
           lastUpdate={lastUpdate}
         />
 
@@ -196,7 +214,7 @@ export default async function OpportunitesPage({ searchParams }: PageProps) {
               <OppRow
                 key={opp.id}
                 opp={opp}
-                num={total - offset - idx}
+                num={pageOffset + idx + 1}
               />
             ))}
           </ol>
@@ -389,7 +407,7 @@ function applyClientFilters(
 ): Opportunity[] {
   let out = items.slice()
 
-  // Filtre par bucket d'échéance (post-fetch - on a déjà includeExpired=false)
+  // Filtre par bucket d'échéance (post-fetch — on a déjà includeExpired=false)
   if (opts.deadlineBucket) {
     const now = Date.now()
     out = out.filter((o) => {

@@ -119,7 +119,17 @@ export function Footer() {
           }}
         >
           <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-3">
-            <span>© {new Date().getFullYear()} Encre · Paris, France</span>
+            <span>
+              © {new Date().getFullYear()} Encre · Paris, France ·{' '}
+              <a
+                href="https://github.com/Nctrn17/encre"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link"
+              >
+                Code source
+              </a>
+            </span>
             <span>
               Données indicatives : vérifiez le règlement officiel auprès de chaque émetteur.
             </span>

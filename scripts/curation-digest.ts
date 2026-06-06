@@ -1,5 +1,5 @@
 /**
- * Email digest curation hebdomadaire - version CLI locale.
+ * Email digest curation hebdomadaire — version CLI locale.
  *
  * Pour le déclenchement réel (GitHub Actions samedi 8 h Paris), c'est
  * /api/cron/curation-digest qui tourne en prod. Ce script sert à

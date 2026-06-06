@@ -11,7 +11,7 @@ import { getSiteUrl } from '@/lib/site'
  *
  * Le segment accepte aussi un suffixe `.ics` (`/api/calendar/cinema.ics`) pour
  * faciliter l'abonnement depuis les agendas qui exigent une extension visible
- * - il est strippé avant lookup dans la taxonomie.
+ * — il est strippé avant lookup dans la taxonomie.
  *
  * URLs au format slug-tiret (`arts-visuels`), convertis en slug-underscore
  * (`arts_visuels`) pour matcher la taxonomie interne. 404 si discipline inconnue.

@@ -71,8 +71,10 @@ export async function findSemanticDuplicate(params: {
 
 /**
  * Appel à Voyage AI pour générer un embedding.
- * ⚠️ Pas testé live au scaffolding.
+ * voyage-3-lite renvoie 512 dimensions (testé live 2026-05-28). La table
+ * opportunity_embeddings est en vector(512) depuis la migration 0038.
  */
+const EMBEDDING_DIM = 512
 export async function embedText(
   text: string,
   options: { apiKey?: string; model?: string; fetchImpl?: typeof fetch } = {},
@@ -103,8 +105,8 @@ export async function embedText(
 
   const json = (await response.json()) as { data: Array<{ embedding: number[] }> }
   const emb = json.data[0]?.embedding
-  if (!emb || emb.length !== 768) {
-    throw new Error(`Unexpected embedding dimension: ${emb?.length}`)
+  if (!emb || emb.length !== EMBEDDING_DIM) {
+    throw new Error(`Unexpected embedding dimension: ${emb?.length} (attendu ${EMBEDDING_DIM})`)
   }
   return emb
 }

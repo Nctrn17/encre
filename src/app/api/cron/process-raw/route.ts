@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { checkCronSecret } from '@/lib/cron-auth'
 import { processRawBatch } from '@/lib/pipeline/process-raw'
 
 export const runtime = 'nodejs'
@@ -13,10 +14,8 @@ export const maxDuration = 300 // 5 min max (Vercel Pro requis pour >60s)
  * POST /?batch=100 : traite un batch customisé
  */
 export async function POST(request: Request) {
-  const secret = request.headers.get('x-cron-secret')
-  if (!secret || secret !== process.env.CRON_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const unauthorized = checkCronSecret(request)
+  if (unauthorized) return unauthorized
 
   const url = new URL(request.url)
   const batchSize = Math.min(Number.parseInt(url.searchParams.get('batch') ?? '50', 10), 200)
@@ -33,11 +32,3 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
-  return NextResponse.json({
-    endpoint: 'process-raw',
-    method: 'POST',
-    auth: 'x-cron-secret header required',
-    batchMax: 200,
-  })
-}

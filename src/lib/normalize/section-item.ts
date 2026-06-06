@@ -113,12 +113,12 @@ export function normalizeSectionItem(raw: string, kind: SectionKind): string {
  *
  * Drop également les items contenant des caractères non-français
  * (hallucinations LLM observées). Doctrine projet : "Aucune opp publiée
- * avec donnée partielle ou non communiquée" - un item pollué par des
+ * avec donnée partielle ou non communiquée" — un item pollué par des
  * tokens arabes/devanagari/grecs/etc est de la donnée corrompue, pas
  * une donnée partielle légitime. On préfère perdre l'item que d'afficher
  * `Examenينdes dossiers` à l'utilisateur.
  *
- * Les items dropés sont loggés en warn pour observabilité - le caller
+ * Les items dropés sont loggés en warn pour observabilité — le caller
  * peut décider de re-classifier l'opp avec un autre modèle ou de la
  * flagger pour curation manuelle.
  */
@@ -132,7 +132,7 @@ export function normalizeSectionList(items: string[] | null | undefined, kind: S
       const findings = findSuspectChars(norm)
       const kinds = [...new Set(findings.map((f) => f.kind))].join(', ')
       console.warn(
-        `  [normalize] drop ${kind}#item - chars suspects (${kinds}) : "${norm.slice(0, 80)}"`,
+        `  [normalize] drop ${kind}#item — chars suspects (${kinds}) : "${norm.slice(0, 80)}"`,
       )
       continue
     }
@@ -142,7 +142,7 @@ export function normalizeSectionList(items: string[] | null | undefined, kind: S
 }
 
 /**
- * Tri canonique par famille - homogénéise l'ordre interne des items
+ * Tri canonique par famille — homogénéise l'ordre interne des items
  * pour que toutes les fiches Encre se sentent comme la même publication.
  *
  * Conditions (6 familles) :
@@ -181,31 +181,31 @@ const W = `(?:^|[\\s,;:.'’"«»()\\-])` // word-boundary FR-safe (start)
 const WE = `(?=[\\s,;:.'’"«»()\\-]|$)` // word-boundary FR-safe (end, lookahead)
 
 const CONDITIONS_FAMILIES: FamilyRule[] = [
-  // 6 - Exclusions : tester en premier car "Ne pas être auteur…" doit gagner sur "auteur"
+  // 6 — Exclusions : tester en premier car "Ne pas être auteur…" doit gagner sur "auteur"
   { family: 6, re: /^(ne pas|pas d['’]|pas de |sans |aucune? |interdit|exclu)/i },
-  // 5 - Cycle / quota (spécifique : "non boursier", "déjà bénéficié", etc.)
+  // 5 — Cycle / quota (spécifique : "non boursier", "déjà bénéficié", etc.)
   { family: 5, re: new RegExp(`${W}(non boursier|n['’]a (?:pas |jamais )?bénéficié|déjà (?:lauréat|sélectionné|bénéficié)|une seule fois|au maximum|max(?:imum)?\\s+\\d|par an|par cycle|interdit de candidater|cumulable|non cumulable|antérieurement|précédemment|cumul|deux candidatures|nouvelle candidature)`, 'i') },
-  // 3 - Géographique
+  // 3 — Géographique
   { family: 3, re: new RegExp(`${W}(résider|résidant|résidence en|domicilié|nationalité|ressortiss|région|territoire|adresse fiscale|établi[e]? en|installé[e]? (?:à|en)|francophone|européen|européenne|outre-mer|drom-com|drom|antilles|guadeloupe|martinique|guyane|réunion|mayotte|saint-pierre)`, 'i') },
-  // 2 - Parcours / expérience
+  // 2 — Parcours / expérience
   { family: 2, re: new RegExp(`${W}(parcours|expérience|déjà réalisé|déjà produit|antérieur|antérieurs|précédent|précédents|filmographie|carrière|publié|au moins\\s+\\w+\\s+(film|projet|œuvre|publication)|prix|récompens|sélectionné en festival|première diffusion|festivals?|expériences professionnelles)`, 'i') },
-  // 1 - Statut du candidat : restrictif au début de phrase pour éviter
+  // 1 — Statut du candidat : restrictif au début de phrase pour éviter
   // de catcher "Dépôt fait par l'auteur" comme statut (le sujet est "Dépôt").
   { family: 1, re: /^(?:[\s·-]*)?(auteur|autrice|écrivain|écrivaine|réalisateur|réalisatrice|cinéaste|compagnie|association|collectif|étudiant|étudiante|émergent|émergente|producteur|productrice|société de production|porteur de projet|scénariste|jeune création|artiste|professionnel)/i },
-  // 4 - Caractéristiques projet (large : fourre-tout pour ce qui décrit l'œuvre)
+  // 4 — Caractéristiques projet (large : fourre-tout pour ce qui décrit l'œuvre)
   { family: 4, re: new RegExp(`${W}(projet|fiction|documentaire|animation|court[- ]métrage|long[- ]métrage|série|web[- ]?série|format|durée|min(?:utes)?|originale?|adaptation|langue (?:française|originale)|expression française|écriture|développement|post[- ]production|production|tournage|sujet|thématique|première œuvre|inédit|en français)`, 'i') },
 ]
 
 const DOSSIER_FAMILIES: FamilyRule[] = [
-  // 1 - Formulaire
+  // 1 — Formulaire
   { family: 1, re: new RegExp(`${W}(formulaire|inscription en ligne|candidature en ligne|fiche d['’]inscription|dossier de candidature|dépôt en ligne|portail)`, 'i') },
-  // 2 - Artistique
+  // 2 — Artistique
   { family: 2, re: new RegExp(`${W}(synopsis|traitement|scénario|note d['’]intention|bible|extrait|extraits|pitch|résumé|note d['’]écriture|note de réécriture|continuité dialoguée|dossier artistique|dossier de présentation|projet artistique|graphique|storyboard|moodboard|teaser|montage|images|visuel|maquette|démo|portfolio)`, 'i') },
-  // 3 - Économique
+  // 3 — Économique
   { family: 3, re: new RegExp(`${W}(budget|devis|plan de financement|prévisionnel|chiffré|coût|montant demandé|estimation financière|comptes annuels|bilan|liasse fiscale)`, 'i') },
-  // 4 - Juridique
+  // 4 — Juridique
   { family: 4, re: new RegExp(`${W}(contrat|cession (?:de )?droits|option|k[- ]?bis|statuts (?:juridiques|de l)|attestation|engagement|déclaration|partenariat|coproduction|courrier|lettre (?:d['’]engagement|d['’]intérêt|de soutien|de motivation)|libération de droits|licence|convention)`, 'i') },
-  // 5 - Personnelles / identité
+  // 5 — Personnelles / identité
   { family: 5, re: new RegExp(`${W}(cv|curriculum|pièce d['’]identité|carte d['’]identité|passeport|rib|iban|bic|justificatif de domicil|domiciliation|adresse|coordonnées|biographie|bio[- ]filmographie)`, 'i') },
 ]
 

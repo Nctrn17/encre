@@ -10,7 +10,7 @@ function call(input: { title?: string; description?: string | null; rawJson?: Re
   })
 }
 
-describe('extractPilotFields - requires_editor (migration 0019)', () => {
+describe('extractPilotFields — requires_editor (migration 0019)', () => {
   it('injecte les tags explicites raw_json.hint_disciplines_tags', () => {
     const r = call({
       rawJson: { hint_disciplines_tags: ['scenario', 'femmes', 'minorites-de-genre'] },
@@ -110,7 +110,7 @@ describe('extractPilotFields - requires_editor (migration 0019)', () => {
   })
 })
 
-describe('extractPilotFields - disciplines_tags séries / bible / pilote (mai 2026)', () => {
+describe('extractPilotFields — disciplines_tags séries / bible / pilote (mai 2026)', () => {
   it('détecte "série" seul (regex large)', () => {
     const r = call({ description: 'Bourse pour une série de fiction.' })
     expect(r.disciplines_tags).toContain('serie')
@@ -152,7 +152,7 @@ describe('extractPilotFields - disciplines_tags séries / bible / pilote (mai 20
   })
 })
 
-describe('extractPilotFields - tag formation (programmes pédagogiques)', () => {
+describe('extractPilotFields — tag formation (programmes pédagogiques)', () => {
   it('détecte compagnonnage', () => {
     const r = call({ description: 'Compagnonnage en écriture scénaristique sur 6 mois.' })
     expect(r.disciplines_tags).toContain('formation')
@@ -171,7 +171,7 @@ describe('extractPilotFields - tag formation (programmes pédagogiques)', () => 
   })
 })
 
-describe('extractPilotFields - tag pays-du-sud (éligibilité OIF / TV5MONDE+)', () => {
+describe('extractPilotFields — tag pays-du-sud (éligibilité OIF / TV5MONDE+)', () => {
   it('détecte Fonds Image de la Francophonie', () => {
     const r = call({ description: 'Le Fonds Image de la Francophonie soutient les séries.' })
     expect(r.disciplines_tags).toContain('pays-du-sud')
@@ -199,7 +199,7 @@ describe('extractPilotFields - tag pays-du-sud (éligibilité OIF / TV5MONDE+)',
   })
 })
 
-describe('extractPilotFields - tag outremer (accessibilité DROM-COM)', () => {
+describe('extractPilotFields — tag outremer (accessibilité DROM-COM)', () => {
   it('détecte éligibilité réservée aux auteurs ultra-marins', () => {
     const r = call({
       description: "Bourse réservée aux auteurs ultra-marins en début de carrière.",
@@ -246,7 +246,7 @@ describe('extractPilotFields - tag outremer (accessibilité DROM-COM)', () => {
   })
 })
 
-describe('extractPilotFields - tag non-scenariste (aides industrielles AV)', () => {
+describe('extractPilotFields — tag non-scenariste (aides industrielles AV)', () => {
   it('détecte aide aux moyens techniques', () => {
     const r = call({
       title: 'Aides aux moyens techniques : collège « tournage »',
@@ -317,7 +317,7 @@ describe('extractPilotFields - tag non-scenariste (aides industrielles AV)', () 
   })
 })
 
-describe('extractPilotFields - garde-fou contexte photo / arts visuels', () => {
+describe('extractPilotFields — garde-fou contexte photo / arts visuels', () => {
   it('bourse photographe ne se retrouve pas taggée serie / documentaire', () => {
     // Régression : la description de la Bourse Photographe Lagardère contient
     // « projet photographique (reportage, série, documentaire visuel) » et
@@ -328,13 +328,29 @@ describe('extractPilotFields - garde-fou contexte photo / arts visuels', () => {
       description:
         "Bourse destinée à un·e jeune photographe pour la réalisation d'un projet photographique " +
         "de création (reportage, série, documentaire visuel).",
-      disciplines: ['arts-visuels', 'photographie'],
+      disciplines: ['arts_visuels', 'photographie'],
     })
     expect(r.disciplines_tags).not.toContain('serie')
     expect(r.disciplines_tags).not.toContain('documentaire')
     expect(r.disciplines_tags).not.toContain('scenario')
     // En revanche, on garde bien les disciplines source.
     expect(r.disciplines_tags).toContain('photographie')
+  })
+
+  it('garde-fou arts_visuels seul (sans photographie) bloque serie / documentaire', () => {
+    // Régression dédiée : le slug de production est 'arts_visuels' (underscore),
+    // pas 'arts-visuels'. Ce test échouerait si le garde-fou utilisait le mauvais
+    // slug, même quand 'photographie' est absent des disciplines.
+    const r = call({
+      title: 'Aide à la création arts visuels',
+      description:
+        'Aide destinée à un·e artiste plasticien·ne pour un projet de création ' +
+        '(installation, série, documentaire visuel).',
+      disciplines: ['arts_visuels'],
+    })
+    expect(r.disciplines_tags).not.toContain('serie')
+    expect(r.disciplines_tags).not.toContain('documentaire')
+    expect(r.disciplines_tags).not.toContain('scenario')
   })
 
   it('en contexte AV normal, les mots série / documentaire taguent bien', () => {

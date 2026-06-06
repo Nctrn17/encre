@@ -62,7 +62,7 @@ CREATE POLICY "saved_opportunities_owner_all" ON saved_opportunities
 
 -- Sources : service_role only (pas de policy user)
 ALTER TABLE sources ENABLE ROW LEVEL SECURITY;
--- No user policies - seul le service_role bypass RLS
+-- No user policies — seul le service_role bypass RLS
 
 -- Raw items : service_role only
 ALTER TABLE raw_items ENABLE ROW LEVEL SECURITY;

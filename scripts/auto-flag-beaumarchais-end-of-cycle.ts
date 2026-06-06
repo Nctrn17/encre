@@ -4,7 +4,7 @@
  * Les bourses Beaumarchais (Théâtre, Télévision, Mise en scène, Cinéma,
  * Animation, Court métrage…) ouvrent quasi à date fixe annuellement.
  * Quand la deadline d'un cycle passe, le cycle suivant n'est généralement
- * pas encore annoncé sur le site - la page reste avec le règlement de
+ * pas encore annoncé sur le site — la page reste avec le règlement de
  * l'édition précédente.
  *
  * Plutôt que de laisser ces opps tomber dans la file EXPIRED (et y rester

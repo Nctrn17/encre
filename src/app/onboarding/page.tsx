@@ -68,7 +68,7 @@ export default async function OnboardingPage() {
         </div>
       </section>
 
-      {/* STEPPER - rendu par le client component */}
+      {/* STEPPER — rendu par le client component */}
       <OnboardingStepper existingProfiles={existingProfiles} />
     </div>
   )

@@ -68,13 +68,13 @@ function renderQueueHtml(title: string, opps: CurationOpp[], color: string, site
 export function renderCurationDigest(q: CurationQueues, opts: RenderOpts): RenderedDigest {
   const siteUrl = opts.siteUrl.replace(/\/$/, '')
   const date = new Date(q.generatedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-  const total = q.awaitingDetails.length + q.partialExtraction.length + q.expired.length + q.newThisWeek.length
+  const total = q.aPublier.length + q.awaitingDetails.length + q.partialExtraction.length + q.expired.length + q.newThisWeek.length
   const subject = `Encre · curation ${date} - ${total} opp${total === 1 ? '' : 's'} à voir`
 
   const text = `ENCRE · CURATION ${date.toUpperCase()}
 
 ${total} opp${total === 1 ? '' : 's'} à passer en revue avant la newsletter de lundi.
-${renderQueueText('Awaiting details', q.awaitingDetails, siteUrl)}${renderQueueText('Extraction partielle', q.partialExtraction, siteUrl, 15)}${renderQueueText('Expirées', q.expired, siteUrl)}${renderQueueText('Nouvelles cette semaine', q.newThisWeek, siteUrl)}
+${renderQueueText('À publier', q.aPublier, siteUrl)}${renderQueueText('Awaiting details', q.awaitingDetails, siteUrl)}${renderQueueText('Extraction partielle', q.partialExtraction, siteUrl, 15)}${renderQueueText('Expirées', q.expired, siteUrl)}${renderQueueText('Nouvelles cette semaine', q.newThisWeek, siteUrl)}
 Pour curer en place : ${siteUrl}/admin/curation
 `
 
@@ -85,7 +85,8 @@ Pour curer en place : ${siteUrl}/admin/curation
 <tr><td>
   <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#c8362b;margin-bottom:12px;">Encre · Curation</div>
   <h1 style="font-family:'Source Serif 4',Georgia,serif;font-size:28px;font-weight:600;letter-spacing:-0.02em;margin:0 0 14px;color:#1c1817;">${date}</h1>
-  <p style="font-size:15px;line-height:1.5;color:#6b5e54;margin:0 0 36px;max-width:60ch;">${total} opp${total === 1 ? '' : 's'} à passer en revue avant la newsletter de lundi. Tu peux curer en place sur la <a href="${siteUrl}/admin/curation" style="color:#1c1817;border-bottom:1px solid #c8362b;text-decoration:none;">page admin</a> - un clic sur chaque ligne ci-dessous t'y emmène directement.</p>
+  <p style="font-size:15px;line-height:1.5;color:#6b5e54;margin:0 0 36px;max-width:60ch;">${total} opp${total === 1 ? '' : 's'} à passer en revue avant la newsletter de lundi. La curation se fait en place sur la <a href="${siteUrl}/admin/curation" style="color:#1c1817;border-bottom:1px solid #c8362b;text-decoration:none;">page admin</a> : un clic sur chaque ligne ci-dessous y mène directement.</p>
+  ${renderQueueHtml('À publier', q.aPublier, '#c8362b', siteUrl)}
   ${renderQueueHtml('Awaiting details', q.awaitingDetails, '#c8362b', siteUrl)}
   ${renderQueueHtml('Extraction partielle', q.partialExtraction, '#1c1817', siteUrl, 15)}
   ${renderQueueHtml('Expirées', q.expired, '#7a6a2c', siteUrl)}

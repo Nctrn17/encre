@@ -37,7 +37,7 @@ export default function NotFound() {
                 color: 'var(--cream-text)',
               }}
             >
-              Le dispositif que vous cherchez n&apos;existe plus, ou n&apos;a
+              L&apos;appel que vous cherchez n&apos;existe plus, ou n&apos;a
               jamais existé.
             </p>
             <p

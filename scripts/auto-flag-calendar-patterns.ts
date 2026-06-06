@@ -22,7 +22,7 @@
  *
  * Filtres :
  *   - --emitter CNC : limite à un émetteur (sinon tous les émetteurs sont
- *     candidats - la logique est générique, pas spécifique au CNC)
+ *     candidats — la logique est générique, pas spécifique au CNC)
  *   - --limit N : limite le nombre d'opps traitées
  *
  * Pré-requis : module src/lib/pipeline/calendar-pattern.ts.
@@ -86,7 +86,7 @@ function decide(
     }
   }
   // Si on a réussi à synthétiser un Format A depuis le pattern « Prochaine
-  // date limite : <liste> », on l'applique en priorité - c'est plus
+  // date limite : <liste> », on l'applique en priorité — c'est plus
   // utile au user qu'un flag awaiting_details vide.
   if (synthesized && synthesized.length >= 2 && currentCal.length === 0) {
     return {
@@ -98,7 +98,7 @@ function decide(
   if (pattern === 'awaiting_next') {
     // On ne flag QUE si un marqueur explicite a été trouvé. Les
     // `unknown_empty` (calendrier vide sans marqueur) sont traités en
-    // log_unknown - ils peuvent être Case A (extraction LLM ratée alors
+    // log_unknown — ils peuvent être Case A (extraction LLM ratée alors
     // que la page a bien un calendrier), et flagger awaiting_details
     // afficherait un bandeau trompeur à l'utilisateur.
     if (currentNes === 'awaiting_details') {
@@ -113,14 +113,14 @@ function decide(
   if (pattern === 'partial_format_c') {
     return {
       action: 'log_partial',
-      reason: 'extraction Format C tronquée - à re-classify via enrich-from-page',
+      reason: 'extraction Format C tronquée — à re-classify via enrich-from-page',
     }
   }
   if (pattern === 'unknown_empty') {
     return {
       action: 'log_unknown',
       reason:
-        'calendrier vide sans marqueur identifiable - possiblement extraction ratée (Case A), à curer manuellement',
+        'calendrier vide sans marqueur identifiable — possiblement extraction ratée (Case A), à curer manuellement',
     }
   }
   return { action: 'skip', reason: 'ok' }
@@ -254,7 +254,7 @@ async function main() {
   console.log(`  skip                : ${tally.skip}`)
   console.log(`  fetch_failed        : ${tally.fetch_failed}`)
   if (!apply) {
-    console.log(`\n(Dry-run - pass --apply to execute the updates.)`)
+    console.log(`\n(Dry-run — pass --apply to execute the updates.)`)
   }
 }
 

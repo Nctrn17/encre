@@ -1,5 +1,5 @@
 /**
- * Skeleton pour /aides - affiché pendant le fetch DB
+ * Skeleton pour /aides — affiché pendant le fetch DB
  * (listOpportunities). Reflète le layout actuel : main full-width avec
  * recherche + barre de filtres horizontale Linear-style + list-head +
  * liste plate. Évite le layout shift à l'arrivée des données.

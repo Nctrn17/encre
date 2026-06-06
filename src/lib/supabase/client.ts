@@ -6,7 +6,7 @@ import type { Database } from './types'
  *
  * Sert uniquement à l'état d'auth cosmétique (nav connecté/déconnecté). Garder
  * cette lecture hors du root layout serveur évite d'opter toute l'app hors du
- * rendu statique/ISR - sinon chaque requête tape l'origine (X-Vercel-Cache:
+ * rendu statique/ISR — sinon chaque requête tape l'origine (X-Vercel-Cache:
  * MISS partout, TTFB/LCP dégradés). La protection réelle reste serveur (RLS +
  * guards), cet état n'est pas une frontière de sécurité.
  */

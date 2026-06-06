@@ -65,7 +65,7 @@ const CNL_CONFIG: DrupalListingConfig = {
   titleBlocklist: ['portail numérique', 'faq'],
 }
 
-describe('parseDrupalListing - CNL config', () => {
+describe('parseDrupalListing — CNL config', () => {
   it('extracts title, url, subtitle, categories from aid-teaser articles', () => {
     const items = parseDrupalListing(
       CNL_SAMPLE_HTML,

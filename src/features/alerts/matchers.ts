@@ -145,16 +145,37 @@ export function filterOpportunitiesByProfile(
   return matched.sort((a, b) => b.matchScore - a.matchScore)
 }
 
+// Fenêtre « ferme bientôt » : une fiche dont la deadline tombe dans ≤ N jours
+// est rappelée dans le digest hebdo même si elle n'est plus « nouvelle ».
+// 14 j : rien ne tombe entre deux samedis.
+const CLOSING_SOON_DAYS = 14
+
 export function filterOpportunitiesSinceLastSent(
   opportunities: Opportunity[],
   profile: AlertProfile,
-  options: { logRejections?: boolean } = {},
+  options: { logRejections?: boolean; now?: Date } = {},
 ): Array<Opportunity & { matchScore: number }> {
   const since = profile.last_sent_at ? new Date(profile.last_sent_at) : null
 
+  // Rappel d'échéance : UNIQUEMENT en hebdo. La cadence hebdomadaire dédup
+  // naturellement (une fiche ne reste dans la fenêtre que ~1-2 samedis) → pas
+  // besoin de tracker les rappels déjà envoyés, pas de spam. On NE l'active pas
+  // en quotidien (répéterait chaque jour sans garde-fou de répétition).
+  const now = options.now ?? new Date()
+  const closingSoonCutoff =
+    profile.frequency === 'weekly'
+      ? new Date(now.getTime() + CLOSING_SOON_DAYS * 24 * 60 * 60 * 1000)
+      : null
+
   const filtered = opportunities.filter((o) => {
-    if (!since) return true
-    return new Date(o.published_at) > since
+    // Nouvelle depuis le dernier envoi.
+    if (!since || new Date(o.published_at) > since) return true
+    // Sinon : rappel d'échéance imminente (hebdo seulement, deadline ≤ 14 j).
+    if (closingSoonCutoff && o.deadline) {
+      const d = new Date(o.deadline)
+      return d > now && d <= closingSoonCutoff
+    }
+    return false
   })
 
   return filterOpportunitiesByProfile(filtered, profile, options)

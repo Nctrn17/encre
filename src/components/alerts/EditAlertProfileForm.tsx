@@ -239,7 +239,7 @@ export function EditAlertProfileForm({ profile }: { profile: AlertProfile }) {
             checked={nationalOnly}
             onChange={(event) => setNationalOnly(event.target.checked)}
           />
-          Dispositifs nationaux, européens et internationaux
+          Appels nationaux, européens et internationaux
         </label>
         {!nationalOnly && (
           <ChipGrid>

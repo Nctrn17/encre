@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 
 /**
  * Lien actif vermillon, autres en ink-muted. Isolé en Client Component pour
- * laisser le `Header` parent en RSC pur - sans cela, la frontière `"use
+ * laisser le `Header` parent en RSC pur — sans cela, la frontière `"use
  * client"` remonterait jusqu'au layout global et coûterait du TTI sur toutes
  * les routes.
  */

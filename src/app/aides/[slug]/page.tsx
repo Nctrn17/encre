@@ -30,7 +30,7 @@ import { absoluteUrl, SITE_NAME } from '@/lib/site'
  */
 
 // Types qui se modélisent en Grant (aide monétaire) vs Event (résidence,
-// concours, commande - activité datée). Cf. schema.org/Grant et /Event.
+// concours, commande — activité datée). Cf. schema.org/Grant et /Event.
 const GRANT_TYPES: ReadonlySet<string> = new Set([
   'bourse',
   'subvention',
@@ -269,7 +269,7 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
               <>
                 <span style={{ color: 'var(--ink-rule)' }}>·</span>
                 <span
-                  title="Ouvert aux candidats sans réseau ni producteur attaché"
+                  title="Accessible sans réseau ni producteur attaché"
                   style={{
                     color: 'var(--kelp)',
                     border: '1px solid var(--kelp)',
@@ -348,7 +348,7 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
                 : 'voir source'
             }
           >
-            {deadline ? formatShortDate(deadline) : 'Non communiquée'}
+            {deadline ? formatShortDate(deadline) : 'Voir le règlement'}
           </FicheCell>
 
           <FicheCell label={isPast ? 'Montant cycle clos' : 'Montant'}>
@@ -821,7 +821,7 @@ function Timeline({ items }: { items: string[] }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Cycle récurrent (CNC sessions, etc.) - détection + rendu mini-table
+// Cycle récurrent (CNC sessions, etc.) — détection + rendu mini-table
 // ─────────────────────────────────────────────────────────────────────────
 
 interface CycleParsed {

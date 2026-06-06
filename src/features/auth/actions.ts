@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { safeNext } from './safe-next'
 
 const MagicLinkSchema = z.object({
   email: z.string().email().toLowerCase(),
@@ -24,7 +25,7 @@ export async function sendMagicLink(formData: FormData) {
   const h = await headers()
   const origin = h.get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:4000'
 
-  const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(parsed.data.next ?? '/aides')}`
+  const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(safeNext(parsed.data.next))}`
 
   const { error } = await supabase.auth.signInWithOtp({
     email: parsed.data.email,
@@ -77,7 +78,7 @@ export async function signInWithPassword(formData: FormData) {
     return { error: 'Email ou mot de passe incorrect.' }
   }
 
-  redirect(parsed.data.next ?? '/aides')
+  redirect(safeNext(parsed.data.next))
 }
 
 export async function signOut() {

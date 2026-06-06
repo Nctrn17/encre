@@ -3,7 +3,7 @@
  *
  * - iCal : `ical-generator`. Chaque deadline = 1 VEVENT all-day, alarme à J−7.
  * - RSS  : `feed`. Items triés par deadline ascendante, sans contenu HTML
- *   (juste titre + lien + descriptif court - les lecteurs RSS afficheront un
+ *   (juste titre + lien + descriptif court — les lecteurs RSS afficheront un
  *   teaser sobre).
  *
  * Le fuseau Europe/Paris est porté côté iCal pour que les agendas affichent

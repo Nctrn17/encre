@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Reclassify - 2e passe LLM pour remplir les sections structurées
+ * Reclassify — 2e passe LLM pour remplir les sections structurées
  * (conditions / calendrier / dossier) sur les opportunités existantes.
  *
  * Migration 0018 a ajouté ces 3 champs au schema mais les opps antérieures
@@ -10,7 +10,7 @@
  * calendrier / dossier (les autres champs ne sont pas écrasés).
  *
  * Cascade modèles (mêmes paliers que process-raw.ts) :
- *   1. Gemma 4 31B (DEFAULT_CLASSIFY_MODEL)            - quota free large
+ *   1. Gemma 4 31B (DEFAULT_CLASSIFY_MODEL)            — quota free large
  *   2. Gemini 3 Flash (SECOND_PASS_MODEL) si confidence < 0.6
  *   3. Backoff exponentiel sur HTTP 429 (30s → 60s → 120s, 3 retries)
  *   4. Skip l'opp si tout échoue (pas de fallback local : vide=vide)
@@ -285,7 +285,7 @@ async function main() {
           .eq('id', opp.id)
 
         if (updateErr) {
-          console.warn(`  ✗ ${label} - ${updateErr.message}`)
+          console.warn(`  ✗ ${label} — ${updateErr.message}`)
           errors += 1
           continue
         }
@@ -295,7 +295,7 @@ async function main() {
         updated += 1
       }
     } catch (err) {
-      console.warn(`  ✗ ${label} - ${(err as Error).message.slice(0, 200)}`)
+      console.warn(`  ✗ ${label} — ${(err as Error).message.slice(0, 200)}`)
       errors += 1
     }
 

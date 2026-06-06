@@ -2,7 +2,7 @@
  * Désindexe les opps qui sont structurellement hors cible V1
  * (jeunes auteurs hors-réseau). Décision après review humaine
  * 2026-05-04 : ces aides s'adressent à des sociétés de production,
- * éditeurs de chaînes, ou établissements culturels - pas à des
+ * éditeurs de chaînes, ou établissements culturels — pas à des
  * auteurs individuels.
  *
  * Mode :

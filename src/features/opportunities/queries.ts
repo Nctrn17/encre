@@ -12,7 +12,7 @@ export interface OpportunityFilters {
    */
   disciplinesTagsAny?: string[]
   /**
-   * Liste de tags à EXCLURE - typiquement ['non-scenariste'] sur la
+   * Liste de tags à EXCLURE — typiquement ['non-scenariste'] sur la
    * page publique V1 pour cacher les aides producteurs/distributeurs/
    * exploitants/techniques que le matcher remonte sinon (CNC industriel).
    */
@@ -24,6 +24,18 @@ export interface OpportunityFilters {
    * attachée). Distinct de `horsReseauOnly` qui agrège producteur+éditeur+agent.
    */
   withoutEditor?: boolean
+  /**
+   * Exclut les opps qui requièrent un producteur attaché (`requires_producer`).
+   * Sémantique alignée sur le filtre client de /aides (`!requires_producer`) :
+   * on garde `false` ET `null`, on ne retire que les `true`. À distinguer de
+   * `withoutEditor`/`.eq(false)` qui, lui, écarte aussi les `null`.
+   */
+  excludeRequiresProducer?: boolean
+  /**
+   * Exclut les opps qui requièrent un éditeur attaché (`requires_editor`).
+   * Même sémantique tolérante aux `null` que `excludeRequiresProducer`.
+   */
+  excludeRequiresEditor?: boolean
   types?: string[]
   regionCodes?: string[]
   /**
@@ -52,6 +64,15 @@ export async function listOpportunities(
     .eq('is_published', true)
     .eq('human_review', false)
 
+  // Le registre public ne montre que des appels datés : on exclut les fiches dont
+  // la prochaine édition est annoncée mais sans dates encore publiées (awaiting_details).
+  // Garde-fou anti-zombie : si une telle fiche a malgré tout une deadline future,
+  // on la garde visible (elle EST datée) plutôt que de la cacher à tort.
+  query = query.or(
+    'next_edition_status.is.null,next_edition_status.neq.awaiting_details,deadline.gt.' +
+      new Date().toISOString(),
+  )
+
   if (!filters.includeExpired) {
     query = query.or('deadline.is.null,deadline.gt.' + new Date().toISOString())
   }
@@ -76,6 +97,13 @@ export async function listOpportunities(
   }
   if (filters.withoutEditor) {
     query = query.eq('requires_editor', false)
+  }
+  if (filters.excludeRequiresProducer) {
+    // garde false ET null (opps sans contrainte), retire uniquement true
+    query = query.not('requires_producer', 'is', true)
+  }
+  if (filters.excludeRequiresEditor) {
+    query = query.not('requires_editor', 'is', true)
   }
   if (filters.types?.length) {
     query = query.in('type', filters.types as never[])
@@ -163,7 +191,7 @@ export async function getOpportunityBySlug(slug: string): Promise<Opportunity | 
 export interface ListInPeriodeFilters {
   /** Restreint aux opps dont au moins une discipline matche (ex: ['cinema']). */
   disciplines?: string[]
-  /** Inclure les opps sans deadline (ex: candidatures spontanées) - exclu par défaut. */
+  /** Inclure les opps sans deadline (ex: candidatures spontanées) — exclu par défaut. */
   includeNullDeadline?: boolean
 }
 

@@ -142,8 +142,8 @@ function isEmptySection(value: string[] | null): boolean {
  * empêchait les improvements quand le pipeline progressait (ex: ajout du
  * PDF parsing).
  *
- * Quand la curation manuelle sera ajoutée, prévoir un check
- * `if (manually_curated) return false` au début pour ne jamais
+ * Quand la curation manuelle arrivera (cf. backlog NOTES-REPRISE), ajouter
+ * un check `if (manually_curated) return false` au début pour ne jamais
  * écraser un effort humain.
  */
 function shouldOverwrite(oldSection: string[] | null, newSection: string[]): boolean {
@@ -162,7 +162,7 @@ function isQuotaError(err: unknown): boolean {
   return /\b429\b|quota|rate.?limit|exceeded/i.test(msg)
 }
 
-// Backoff par modèle - Flash a un RPD très serré (250 free tier), donc dès
+// Backoff par modèle — Flash a un RPD très serré (250 free tier), donc dès
 // le 1er 429 on bail vite et on laisse le cascade tomber sur Gemma plutôt
 // que d'attendre 210s pour rien. Gemma a 1500 RPD, on peut se permettre
 // un backoff plus généreux car c'est notre fallback final.
@@ -306,7 +306,7 @@ async function main() {
   if (flags.slugs) query = query.in('slug', flags.slugs)
   if (flags.emitter) query = query.eq('emitter', flags.emitter)
   if (flags.v1Only) {
-    // disciplines_tags @> any(PILOT_TAGS) - ne garde que les opps qui ont au
+    // disciplines_tags @> any(PILOT_TAGS) — ne garde que les opps qui ont au
     // moins un tag pilote scénariste/auteur AV. Cohérent avec /aides
     // et la home (cf. src/lib/pilot-defaults.ts).
     query = query.overlaps('disciplines_tags', [...PILOT_SCENARISTE_TAGS])
@@ -320,7 +320,7 @@ async function main() {
   let opps = (data ?? []) as OpportunityRow[]
   // Filtre opps avec au moins 1 section vide (sauf si --slug/--slugs ciblé :
   // on force le re-traitement même si déjà rempli, utile pour corriger
-  // des extractions buggées - calendrier expiré, mots anglais, etc.).
+  // des extractions buggées — calendrier expiré, mots anglais, etc.).
   if (!flags.slug && !flags.slugs) {
     opps = opps.filter(
       (o) => isEmptySection(o.conditions) || isEmptySection(o.calendrier) || isEmptySection(o.dossier),
@@ -448,7 +448,7 @@ async function main() {
         )
         updated += 1
       } else {
-        // 4. UPDATE - empty-or-better policy :
+        // 4. UPDATE — empty-or-better policy :
         //   - Section vide → fill avec new (cas standard)
         //   - Section non-vide :
         //     - new STRICTEMENT plus d'items que old → overwrite (amélioration
@@ -474,7 +474,7 @@ async function main() {
           .eq('id', opp.id)
 
         if (updateErr) {
-          console.warn(`  ✗ ${label} - ${updateErr.message}`)
+          console.warn(`  ✗ ${label} — ${updateErr.message}`)
           errors += 1
           continue
         }
@@ -485,7 +485,7 @@ async function main() {
         updated += 1
       }
     } catch (err) {
-      console.warn(`  ✗ ${label} - ${(err as Error).message.slice(0, 200)}`)
+      console.warn(`  ✗ ${label} — ${(err as Error).message.slice(0, 200)}`)
       errors += 1
     }
 

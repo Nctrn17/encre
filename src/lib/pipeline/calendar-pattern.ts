@@ -4,7 +4,7 @@
  * signifier 3 choses différentes (extraction ratée, flux continu, ou cycle
  * non encore annoncé).
  *
- * Fonction PURE - pas d'IO, pas de DB. Prend le texte source de la page
+ * Fonction PURE — pas d'IO, pas de DB. Prend le texte source de la page
  * + le calendrier déjà extrait par le LLM, renvoie un verdict avec preuve.
  *
  * Le caller décide quoi faire :
@@ -38,7 +38,7 @@ export const CONTINUOUS_FLOW_ITEM = 'Flux continu, pas de commission'
 /**
  * Marqueurs textuels indiquant un fonctionnement « au fil de l'eau ».
  * Doivent apparaître dans la source officielle, pas dans des sections
- * boilerplate (CNIL, RGPD, footer) - la `clean-description` côté scraper
+ * boilerplate (CNIL, RGPD, footer) — la `clean-description` côté scraper
  * est censée déjà les retirer.
  */
 const CONTINUOUS_MARKERS: RegExp[] = [
@@ -74,7 +74,7 @@ const AWAITING_MARKERS: RegExp[] = [
 ]
 
 /**
- * Marqueur de Format C ligne 1 - quand le LLM extrait juste "N sessions
+ * Marqueur de Format C ligne 1 — quand le LLM extrait juste "N sessions
  * par an[, calendrier annuel récurrent | M calendriers parallèles]" sans
  * la 2e ligne "Clôtures YYYY : …", c'est une extraction tronquée.
  *
@@ -108,7 +108,7 @@ export function detectCalendarPattern(
   //    eux-mêmes (le LLM peut avoir copié un marqueur dans un item).
   const allHaystacks = [text, ...calendrier]
 
-  // 2a. Continuous (vérifier d'abord - plus spécifique qu'awaiting)
+  // 2a. Continuous (vérifier d'abord — plus spécifique qu'awaiting)
   for (const haystack of allHaystacks) {
     for (const re of CONTINUOUS_MARKERS) {
       const m = haystack.match(re)
@@ -143,7 +143,7 @@ export function detectCalendarPattern(
  *
  * Renvoie un nouveau tableau (immutable). Si pattern === 'ok' ou
  * 'unknown_empty' ou 'partial_format_c' ou 'awaiting_next', le calendrier
- * est laissé tel quel - le caller décidera (re-extract, flag, etc.).
+ * est laissé tel quel — le caller décidera (re-extract, flag, etc.).
  */
 export function applyContinuousFlowOverride(
   calendrier: readonly string[],
@@ -195,7 +195,7 @@ const FRENCH_MONTHS_LIST = [
 
 /**
  * Match une ligne de date française au format `[jour-de-la-semaine] J mois YYYY`.
- * Le préfixe jour-de-la-semaine (lundi, mardi…) est optionnel - c'est
+ * Le préfixe jour-de-la-semaine (lundi, mardi…) est optionnel — c'est
  * fréquent sur les pages CNC. Tolère les accents simplifiés (fevrier, aout…).
  */
 const FRENCH_DATE_LINE_RE = new RegExp(
@@ -238,7 +238,7 @@ export function extractProchaineDateList(sourceText: string | null | undefined):
 
     // Collecte les dates qui suivent, en sautant les lignes vides
     // (fréquentes dans le texte stripé). Le 1er non-blanc qui n'est PAS
-    // une date marque la fin de la liste - soit on est tombé sur une
+    // une date marque la fin de la liste — soit on est tombé sur une
     // section suivante (début d'autre paragraphe), soit ce n'était pas
     // une vraie liste sous l'en-tête (auquel cas collected reste vide
     // et on passera au prochain match d'en-tête).

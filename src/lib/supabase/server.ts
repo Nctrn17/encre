@@ -32,7 +32,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             })
           } catch {
-            // En Server Component, `set` est bloqué - ignoré
+            // En Server Component, `set` est bloqué — ignoré
           }
         },
       },

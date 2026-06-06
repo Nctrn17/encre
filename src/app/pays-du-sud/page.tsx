@@ -7,7 +7,7 @@ import type { Opportunity } from '@/lib/supabase/types'
  * Encre · section dédiée Pays du Sud.
  *
  * Listing des aides accessibles aux créateurs des pays francophones du
- * Sud (zone OIF) - distinct du listing /aides qui cible la cible
+ * Sud (zone OIF) — distinct du listing /aides qui cible la cible
  * scénariste FR métropole.
  *
  * Le tag `pays-du-sud` est appliqué par `extractPilotFields` quand la
@@ -25,12 +25,12 @@ export const revalidate = 1800 // 30 min
 export const metadata: Metadata = {
   title: 'Pays du Sud',
   description:
-    "Aides à l'écriture et à la création audiovisuelle ouvertes aux créateurs des pays francophones du Sud (zone OIF, TV5MONDE+). Cinéma fiction, documentaires, séries, animation.",
+    "Aides à l'écriture et à la création audiovisuelle ouvertes aux créatrices et créateurs des pays francophones du Sud (zone OIF, TV5MONDE+). Cinéma fiction, documentaires, séries, animation.",
   alternates: { canonical: '/pays-du-sud' },
   openGraph: {
     title: "Pays du Sud · aides à l'écriture audiovisuelle",
     description:
-      'Aides ouvertes aux créateurs des pays francophones du Sud (OIF, TV5MONDE+).',
+      'Aides ouvertes aux créatrices et créateurs des pays francophones du Sud (OIF, TV5MONDE+).',
     type: 'website',
     url: '/pays-du-sud',
   },
@@ -72,14 +72,14 @@ export default async function PaysDuSudPage() {
             maxWidth: '20ch',
           }}
         >
-          Aides ouvertes aux créateurs des pays du Sud.
+          Aides ouvertes aux créatrices et créateurs des pays du Sud.
         </h1>
         <p style={ledeStyle}>
           Encre recense aussi les fonds réservés aux ressortissants des pays
           francophones du Sud (zone OIF : Afrique, Caraïbes, Asie, Amérique
-          latine). Ces dispositifs ne sont <strong style={proseStrongStyle}>pas
+          latine). Ces aides ne sont <strong style={proseStrongStyle}>pas
           ouverts</strong> aux résidents français de métropole ; ils sont
-          présentés ici pour les créateurs qui peuvent y prétendre, et pour la
+          présentés ici pour les créatrices et créateurs qui peuvent y prétendre, et pour la
           transparence sur l\&apos;écosystème global d\&apos;aides
           francophones.
         </p>
@@ -189,7 +189,7 @@ function EmptyState() {
       }}
     >
       <p style={{ fontFamily: 'var(--font-serif)', color: 'var(--ink-muted)' }}>
-        Aucun dispositif référencé pour le moment dans cette section.
+        Aucun appel référencé pour le moment dans cette section.
       </p>
     </div>
   )

@@ -1,0 +1,60 @@
+name: Curation digest (samedi)
+
+on:
+  schedule:
+    # Samedi 06:00 UTC = 08:00 Paris (heure d'été) / 07:00 Paris (heure d'hiver)
+    - cron: '0 6 * * 6'
+  workflow_dispatch:
+    inputs:
+      preview:
+        description: 'Mode preview (pas d''envoi réel)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  send-curation-digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Trigger curation-digest endpoint
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PREVIEW: ${{ inputs.preview && '1' || '0' }}
+        run: |
+          if [ -z "$SITE_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "❌ Secrets SITE_URL ou CRON_SECRET manquants"
+            exit 1
+          fi
+
+          URL="$SITE_URL/api/cron/curation-digest"
+          if [ "$PREVIEW" = "1" ]; then
+            URL="$URL?preview=1"
+          fi
+
+          echo "Trigger $URL"
+          RESPONSE=$(curl -sS -X POST "$URL" \
+            -H "x-cron-secret: $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            --fail-with-body)
+
+          echo "Response:"
+          echo "$RESPONSE"
+
+          # Step summary
+          SENT=$(echo "$RESPONSE" | grep -oE '"sent":(true|false)' | head -1 | cut -d: -f2)
+          AWAITING=$(echo "$RESPONSE" | grep -oE '"awaiting":[0-9]+' | head -1 | cut -d: -f2)
+          PARTIAL=$(echo "$RESPONSE" | grep -oE '"partial":[0-9]+' | head -1 | cut -d: -f2)
+          EXPIRED=$(echo "$RESPONSE" | grep -oE '"expired":[0-9]+' | head -1 | cut -d: -f2)
+          NEW_WEEK=$(echo "$RESPONSE" | grep -oE '"new_week":[0-9]+' | head -1 | cut -d: -f2)
+
+          {
+            echo "## Résultat curation digest"
+            echo "- Email envoyé : ${SENT:-unknown}"
+            echo "- Awaiting details : ${AWAITING:-?}"
+            echo "- Extraction partielle : ${PARTIAL:-?}"
+            echo "- Expirées : ${EXPIRED:-?}"
+            echo "- Nouvelles cette semaine : ${NEW_WEEK:-?}"
+          } >> "$GITHUB_STEP_SUMMARY"

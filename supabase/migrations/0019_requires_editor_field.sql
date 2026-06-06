@@ -1,4 +1,4 @@
--- Migration 0019 - Champ requires_editor pour filtre auteurs littéraires
+-- Migration 0019 — Champ requires_editor pour filtre auteurs littéraires
 --
 -- Contexte : pour les pilotes auteurs littéraires (post-V1), beaucoup d'aides
 -- exigent qu'un éditeur (maison d'édition) soit déjà attaché au projet —
@@ -28,7 +28,7 @@ BEGIN;
 --         d'écriture CNL auteur, résidence d'écriture sans condition d'édition)
 --
 -- Default FALSE : on préfère faux-négatifs (proposer une aide même si elle
--- requiert finalement un éditeur - l'utilisateur lira les détails) à
+-- requiert finalement un éditeur — l'utilisateur lira les détails) à
 -- faux-positifs (cacher des aides accessibles).
 ALTER TABLE opportunities
   ADD COLUMN IF NOT EXISTS requires_editor boolean DEFAULT false;
@@ -36,7 +36,7 @@ ALTER TABLE opportunities
 COMMENT ON COLUMN opportunities.requires_editor IS
   'TRUE si une maison d''édition doit être attachée au dossier de candidature. Filtre dédié pour auteurs littéraires non-publiés. Distinct de hors_reseau_friendly (agrégat éditeur+producteur+agent) et de requires_producer (cinéma).';
 
--- Index partiel sur les opps SANS éditeur - c'est la valeur la plus filtrée
+-- Index partiel sur les opps SANS éditeur — c'est la valeur la plus filtrée
 -- (les auteurs qui cochent "pas d'éditeur" veulent voir requires_editor = false).
 CREATE INDEX IF NOT EXISTS idx_opps_requires_editor_false
   ON opportunities (requires_editor)

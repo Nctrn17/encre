@@ -1,0 +1,91 @@
+name: Send weekly digests
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # Tous les jours 06:00 UTC ; l'app filtre les hebdos par jour choisi.
+  workflow_dispatch:
+    inputs:
+      frequency:
+        description: 'Fréquence à traiter (weekly | daily | deadline_only)'
+        required: false
+        default: 'weekly'
+        type: string
+      preview:
+        description: 'Mode preview (pas d''envoi réel)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  send-digests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Trigger send-digests endpoint
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          FREQUENCY: ${{ inputs.frequency || 'weekly' }}
+          PREVIEW: ${{ inputs.preview && '1' || '0' }}
+        run: |
+          if [ -z "$SITE_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "❌ Secrets SITE_URL ou CRON_SECRET manquants"
+            exit 1
+          fi
+
+          URL="$SITE_URL/api/cron/send-digests?frequency=$FREQUENCY"
+          if [ "$PREVIEW" = "1" ]; then
+            URL="$URL&preview=1"
+          fi
+
+          echo "Trigger $URL"
+          RESPONSE=$(curl -sS -X POST "$URL" \
+            -H "x-cron-secret: $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            --fail-with-body)
+
+          echo "Response:"
+          echo "$RESPONSE"
+
+          # Extrait emails_sent pour le step summary
+          SENT=$(echo "$RESPONSE" | grep -oE '"emails_sent":[0-9]+' | head -1 | cut -d: -f2)
+          ERRORS=$(echo "$RESPONSE" | grep -oE '"errors":\[[^\]]*\]' | head -1)
+
+          echo "## Résultat digest" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Fréquence : $FREQUENCY" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Preview : $PREVIEW" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Emails envoyés : ${SENT:-unknown}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Trigger waitlist-broadcast endpoint
+        # Tourne tous les jours ; la route s'auto-filtre au lundi (Europe/Paris).
+        # Sert les inscrits waitlist SANS veille (les autres ont leur digest perso).
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PREVIEW: ${{ inputs.preview && '1' || '0' }}
+        run: |
+          if [ -z "$SITE_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "❌ Secrets SITE_URL ou CRON_SECRET manquants"
+            exit 1
+          fi
+
+          URL="$SITE_URL/api/cron/waitlist-broadcast"
+          if [ "$PREVIEW" = "1" ]; then
+            URL="$URL?preview=1"
+          fi
+
+          echo "Trigger $URL"
+          RESPONSE=$(curl -sS -X POST "$URL" \
+            -H "x-cron-secret: $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            --fail-with-body)
+
+          echo "Response:"
+          echo "$RESPONSE"
+
+          SENT=$(echo "$RESPONSE" | grep -oE '"emails_sent":[0-9]+' | head -1 | cut -d: -f2)
+
+          echo "## Résultat broadcast waitlist" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Preview : $PREVIEW" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Emails envoyés : ${SENT:-skipped (hors lundi)}" >> "$GITHUB_STEP_SUMMARY"

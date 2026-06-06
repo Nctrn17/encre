@@ -9,9 +9,10 @@
 
 import { z } from 'zod'
 import { DISCIPLINE_SLUGS, AUDIENCE_SLUGS, OPPORTUNITY_TYPES, GEO_SCOPES } from '@/lib/discipline-taxonomy'
+import { FR_REGION_CODE_KEYS } from '@/lib/region-codes'
 
 // ==========================================================================
-// RawItem - payload brut pushé par les scrapers dans raw_items
+// RawItem — payload brut pushé par les scrapers dans raw_items
 // ==========================================================================
 
 export const RawItemPayloadSchema = z.object({
@@ -39,7 +40,7 @@ const RawItemInputSchema = z.object({
 type RawItemInput = z.infer<typeof RawItemInputSchema>
 
 // ==========================================================================
-// Opportunity - schéma canonique (miroir de la table opportunities)
+// Opportunity — schéma canonique (miroir de la table opportunities)
 // ==========================================================================
 
 export const OpportunityDraftSchema = z.object({
@@ -86,7 +87,7 @@ export const OpportunityDraftSchema = z.object({
 export type OpportunityDraft = z.infer<typeof OpportunityDraftSchema>
 
 // ==========================================================================
-// Classification IA : sortie structurée forcée par function calling (tool use)
+// Classification IA : sortie structurée forcée via tool_use (API LLM)
 // ==========================================================================
 
 export const ClassificationOutputSchema = z.object({
@@ -112,7 +113,7 @@ export type ClassificationOutput = z.infer<typeof ClassificationOutputSchema>
 export const WaitlistSignupSchema = z.object({
   email: z.string().email().toLowerCase(),
   disciplines: z.array(z.enum(DISCIPLINE_SLUGS)).default([]),
-  region_codes: z.array(z.string()).default([]),
+  region_codes: z.array(z.enum(FR_REGION_CODE_KEYS)).default([]),
   source: z.string().max(100).optional(),
 })
 
@@ -129,7 +130,10 @@ export const AlertProfileInputSchema = z.object({
   audience: z.array(z.enum(AUDIENCE_SLUGS)).default([]),
   types: z.array(z.enum(OPPORTUNITY_TYPES)).default([]),
   geo_scopes: z.array(z.enum(GEO_SCOPES)).default([]),
-  region_codes: z.array(z.string()).default([]),
+  // Borné par élément pour bloquer l'abus (chaînes géantes) sans restreindre à
+  // une enum stricte — les profils d'alerte existants peuvent contenir des codes
+  // hérités. Le waitlist public, lui, est contraint par enum.
+  region_codes: z.array(z.string().max(10)).default([]),
   min_amount: z.number().int().nonnegative().optional().nullable(),
   frequency: z.enum(['daily', 'weekly', 'deadline_only']).default('weekly'),
   send_weekday: z.number().int().min(1).max(7).default(1),

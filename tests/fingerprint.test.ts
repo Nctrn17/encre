@@ -66,7 +66,7 @@ describe('computeFingerprint', () => {
 describe('generateOpportunitySlug', () => {
   it('generates URL-safe slug', () => {
     const slug = generateOpportunitySlug({
-      title: 'Résidence d\'artistes - Villa Kujoyama 2026',
+      title: 'Résidence d\'artistes — Villa Kujoyama 2026',
       emitter: 'Institut français',
     })
     expect(slug).toMatch(/^[a-z0-9-]+$/)
@@ -93,10 +93,10 @@ describe('generateOpportunitySlug', () => {
   it('skips emitter suffix when title already contains it', () => {
     // Cas réel observé sur Moulin d'Andé : titre "Moulin d'Andé CÉCI —
     // Résidence Croisée (collège Suzanne Lipinska)" avec émetteur
-    // "Moulin d'Andé - CÉCI". Avant fix, le slug dupliquait le préfixe.
+    // "Moulin d'Andé — CÉCI". Avant fix, le slug dupliquait le préfixe.
     const slug = generateOpportunitySlug({
-      title: "Moulin d'Andé CÉCI - Résidence Croisée (collège Suzanne Lipinska)",
-      emitter: "Moulin d'Andé - CÉCI",
+      title: "Moulin d'Andé CÉCI — Résidence Croisée (collège Suzanne Lipinska)",
+      emitter: "Moulin d'Andé — CÉCI",
     })
     // Une seule occurrence du préfixe émetteur
     expect(slug.match(/moulin-d-ande-ceci/g)?.length).toBe(1)

@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Reclassify - remplissage des champs pilote scénariste (migration 0011)
+ * Reclassify — remplissage des champs pilote scénariste (migration 0011)
  * et de l'éligibilité structurée (migration 0034) sur toutes les
  * opportunités existantes.
  *
@@ -12,7 +12,7 @@
  *   npx tsx scripts/reclassify-pilot-fields.ts          (sec-pass, idempotent)
  *   npx tsx scripts/reclassify-pilot-fields.ts --dry-run
  *
- * Pas d'appel LLM - coût tokens = 0. Juste du regex/texte.
+ * Pas d'appel LLM — coût tokens = 0. Juste du regex/texte.
  */
 
 import { loadEnv } from '../scrapers/lib/load-env'
@@ -73,7 +73,7 @@ async function main() {
 
   for (const opp of opportunities) {
     try {
-      // 2. Lookup matching raw_item (via source_url - payload->>'url')
+      // 2. Lookup matching raw_item (via source_url — payload->>'url')
       const { data: rawItems } = await supabase
         .from('raw_items')
         .select('payload')
@@ -128,7 +128,7 @@ async function main() {
           .eq('id', opp.id)
 
         if (updateErr) {
-          console.warn(`  ✗ ${opp.title.slice(0, 60)} - ${updateErr.message}`)
+          console.warn(`  ✗ ${opp.title.slice(0, 60)} — ${updateErr.message}`)
           errors++
           continue
         }
@@ -139,7 +139,7 @@ async function main() {
         console.log(`  … ${updated}/${opportunities.length} traités`)
       }
     } catch (err) {
-      console.warn(`  ✗ ${opp.title.slice(0, 60)} - ${(err as Error).message}`)
+      console.warn(`  ✗ ${opp.title.slice(0, 60)} — ${(err as Error).message}`)
       errors++
     }
   }

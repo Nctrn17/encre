@@ -1,9 +1,9 @@
 -- ============================================================================
--- Migration 0023 - formation enum + tag pays-du-sud
+-- Migration 0023 — formation enum + tag pays-du-sud
 -- ============================================================================
 --
 -- Contexte (2026-05-13) : extension du scope Encre :
---   1. Ajout du type 'formation' à l'enum opportunity_type - couvre les
+--   1. Ajout du type 'formation' à l'enum opportunity_type — couvre les
 --      compagnonnages (Cité Européenne des Scénaristes), résidences-école
 --      (Series Mania Institute Writers Campus, Eureka Series) et bourses
 --      de formation. Distinct de 'residence' (qui est une période de

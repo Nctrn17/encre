@@ -95,9 +95,9 @@ export default async function AdminDashboard() {
                   <td className="p-3 text-muted">
                     {s.last_run_at
                       ? new Date(s.last_run_at).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })
-                      : '—'}
+                      : '-'}
                   </td>
-                  <td className="p-3">{s.last_run_metrics?.items_found ?? '—'}</td>
+                  <td className="p-3">{s.last_run_metrics?.items_found ?? '-'}</td>
                 </tr>
               ))}
             </tbody>
@@ -126,11 +126,17 @@ export default async function AdminDashboard() {
           >
             Recherches
           </Link>
+          <Link
+            href="/admin/waitlist"
+            className="rounded-[var(--radius)] border border-subtle px-4 py-2 text-sm hover:bg-subtle"
+          >
+            Liste d&apos;attente
+          </Link>
         </div>
         <form
           action={async () => {
             'use server'
-            // trigger manuel pipeline - voir /api/cron/process-raw
+            // trigger manuel pipeline — voir /api/cron/process-raw
           }}
         >
           <p className="text-sm text-muted">

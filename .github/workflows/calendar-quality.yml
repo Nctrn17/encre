@@ -1,0 +1,71 @@
+name: Calendar quality
+
+on:
+  schedule:
+    - cron: '10 6 * * *'
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: 'Appliquer les corrections sûres (continuous / awaiting explicite)'
+        required: false
+        default: true
+        type: boolean
+      limit:
+        description: 'Limiter à N opportunités (vide = toutes)'
+        required: false
+        type: string
+
+jobs:
+  calendar-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run calendar quality pass
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          ARGS=()
+
+          APPLY="${{ inputs.apply }}"
+          if [ "${APPLY:-true}" = "true" ]; then
+            ARGS+=(--apply)
+          fi
+
+          LIMIT="${{ inputs.limit }}"
+          if [ -n "$LIMIT" ]; then
+            ARGS+=(--limit "$LIMIT")
+          fi
+
+          echo "▶ npm run quality:calendar -- ${ARGS[*]}"
+          npm run quality:calendar -- "${ARGS[@]}" | tee calendar-quality.log
+
+          {
+            echo "## Calendar quality · $(date -u +'%F %H:%MZ')"
+            echo ""
+            echo '```text'
+            sed -n '/=== Tally ===/,$p' calendar-quality.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload calendar quality log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: calendar-quality-${{ github.run_id }}
+          path: calendar-quality.log
+          retention-days: 30
+          if-no-files-found: warn

@@ -70,7 +70,7 @@ Disallow:
 
   it('ignore les commentaires et lignes vides', () => {
     const text = `
-# robots.txt - exemple
+# robots.txt — exemple
 User-agent: *  # all bots
 # pas dans /admin
 Disallow: /admin/

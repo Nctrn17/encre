@@ -1,6 +1,6 @@
 /**
  * Helpers de présentation pour les pages calendrier.
- * Pas de dépendance Supabase - purement formatage.
+ * Pas de dépendance Supabase — purement formatage.
  */
 
 import type { Opportunity } from '@/lib/supabase/types'
@@ -128,7 +128,7 @@ export function formatDayMonthShort(date: Date): { day: string; weekday: string 
 }
 
 /**
- * Heure de fin de la deadline ("23h59" ou "00h00") - utile pour le countdown.
+ * Heure de fin de la deadline ("23h59" ou "00h00") — utile pour le countdown.
  */
 export function formatDeadlineHour(date: Date): string {
   const h = String(date.getUTCHours()).padStart(2, '0')

@@ -7,7 +7,7 @@
  * suédois, polonais, etc.) qui apparaissent au milieu de texte censé
  * être en français.
  *
- * Ne corrige RIEN - sortie txt qui peut alimenter `/curate-paste` ou
+ * Ne corrige RIEN — sortie txt qui peut alimenter `/curate-paste` ou
  * une session manuelle de re-classification.
  *
  * Filtres :
@@ -89,7 +89,7 @@ async function main() {
         console.log(`  [${kind}#${idx}] ${item}`)
         for (const f of findings) {
           console.log(
-            `    ⚠ "${f.char}" (${f.kind}, U+${f.char.codePointAt(0)?.toString(16).toUpperCase().padStart(4, '0')}) - context: ${f.context}`,
+            `    ⚠ "${f.char}" (${f.kind}, U+${f.char.codePointAt(0)?.toString(16).toUpperCase().padStart(4, '0')}) — context: ${f.context}`,
           )
           kindTally[f.kind] = (kindTally[f.kind] ?? 0) + 1
           totalFindings++

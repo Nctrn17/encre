@@ -1,5 +1,5 @@
 /**
- * Files de curation hebdomadaire - utilisées par :
+ * Files de curation hebdomadaire — utilisées par :
  *   - /admin/curation (surface de travail)
  *   - scripts/curation-digest.ts (email samedi 8 h)
  *
@@ -44,6 +44,14 @@ export interface CurationOpp {
 }
 
 export interface CurationQueues {
+  /**
+   * Drafts propres jamais publiés (is_published=false, ni rejetés, ni en
+   * review, ni awaiting), créés récemment. Depuis « la machine ne publie
+   * jamais » (migration 0041), c'est la seule porte d'entrée pour publier
+   * manuellement une fiche fraîchement ingérée. Fenêtre récente volontaire :
+   * le backlog ancien des dépubliées s'audite à part.
+   */
+  aPublier: CurationOpp[]
   humanReview: CurationOpp[]
   awaitingDetails: CurationOpp[]
   partialExtraction: CurationOpp[]
@@ -61,7 +69,9 @@ export interface CurationQueueOptions {
 const SELECT_COLS =
   'id,slug,title,description,emitter,source_url,deadline,conditions,calendrier,dossier,disciplines_tags,hors_reseau_friendly,requires_producer,eligibility_summary,eligibility_profile,next_edition_status,is_published,human_review,updated_at,created_at'
 
-const BETA_EXCLUDED_TAGS = new Set(['non-scenariste', 'pays-du-sud', 'foreign-only'])
+// pays-du-sud volontairement gardé : ces aides sont rares et précieuses, on ne
+// les écarte pas de la curation (position produit constante).
+const BETA_EXCLUDED_TAGS = new Set(['non-scenariste', 'foreign-only'])
 const BETA_LOW_SIGNAL_EMITTERS = new Set([
   'Centre national du livre',
   'Ministère de la Culture',
@@ -110,8 +120,25 @@ export async function getCurationQueues(options: CurationQueueOptions = {}): Pro
   const sb = createServiceClient()
   const nowIso = new Date().toISOString()
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  // Fenêtre « récente » de la file À publier : on ne remonte pas le backlog
+  // ancien des dépubliées (liens morts, fiches écartées), qui s'audite à part.
+  const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
 
-  const [humanReviewResult, awaitingResult, partialResult, expiredResult, newWeekResult] = await Promise.all([
+  const [aPublierResult, humanReviewResult, awaitingResult, partialResult, expiredResult, newWeekResult] = await Promise.all([
+    // À publier : drafts propres jamais publiés, créés récemment.
+    // next_edition_status nullable → .or(is.null, eq.open) pour ne pas perdre
+    // les nulls (un .neq exclurait les lignes NULL en SQL).
+    sb
+      .from('opportunities')
+      .select(SELECT_COLS)
+      .eq('is_published', false)
+      .eq('rejected', false)
+      .eq('human_review', false)
+      .or('next_edition_status.is.null,next_edition_status.eq.open')
+      .gte('created_at', fourteenDaysAgo)
+      .overlaps('disciplines_tags', [...PILOT_SCENARISTE_TAGS])
+      .order('created_at', { ascending: false }),
+
     sb
       .from('opportunities')
       .select(SELECT_COLS)
@@ -134,6 +161,7 @@ export async function getCurationQueues(options: CurationQueueOptions = {}): Pro
       .from('opportunities')
       .select(SELECT_COLS)
       .eq('is_published', true)
+      .is('curated_at', null) // déjà traité → sort des files molles (partial + éligibilité)
       .overlaps('disciplines_tags', [...PILOT_SCENARISTE_TAGS])
       .or(`deadline.is.null,deadline.gt.${nowIso}`)
       .order('updated_at', { ascending: false }),
@@ -150,17 +178,20 @@ export async function getCurationQueues(options: CurationQueueOptions = {}): Pro
       .from('opportunities')
       .select(SELECT_COLS)
       .eq('is_published', true)
+      .is('curated_at', null) // déjà traité → sort de « nouveauté de la semaine »
       .gte('created_at', sevenDaysAgo)
       .overlaps('disciplines_tags', [...PILOT_SCENARISTE_TAGS])
       .order('created_at', { ascending: false }),
   ])
 
+  if (aPublierResult.error) throw aPublierResult.error
   if (humanReviewResult.error) throw humanReviewResult.error
   if (awaitingResult.error) throw awaitingResult.error
   if (partialResult.error) throw partialResult.error
   if (expiredResult.error) throw expiredResult.error
   if (newWeekResult.error) throw newWeekResult.error
 
+  const aPublier = (aPublierResult.data ?? []).map((r) => normalizeOpp(r as Record<string, unknown>))
   const humanReview = (humanReviewResult.data ?? []).map((r) => normalizeOpp(r as Record<string, unknown>))
   const awaiting = (awaitingResult.data ?? []).map((r) => normalizeOpp(r as Record<string, unknown>))
   const allActives = (partialResult.data ?? []).map((r) => normalizeOpp(r as Record<string, unknown>))
@@ -178,6 +209,7 @@ export async function getCurationQueues(options: CurationQueueOptions = {}): Pro
         o.dossier.length === 0),
   )
   const rawQueues = {
+    aPublier,
     humanReview,
     awaitingDetails: awaiting,
     partialExtraction: partial,
@@ -186,6 +218,7 @@ export async function getCurationQueues(options: CurationQueueOptions = {}): Pro
     eligibilityReview,
   }
   const hiddenByBetaScope = scope === 'beta' ? uniqueOpps([
+    ...rawQueues.aPublier,
     ...rawQueues.humanReview,
     ...rawQueues.awaitingDetails,
     ...rawQueues.partialExtraction,
@@ -196,6 +229,7 @@ export async function getCurationQueues(options: CurationQueueOptions = {}): Pro
   const visible = scope === 'beta' ? isBetaCurationRelevant : () => true
 
   return {
+    aPublier: aPublier.filter(visible),
     humanReview: humanReview.filter(visible),
     awaitingDetails: awaiting.filter(visible),
     partialExtraction: partial.filter(visible),
@@ -277,6 +311,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  */
 export function queuesHaveContent(q: CurationQueues): boolean {
   return (
+    q.aPublier.length > 0 ||
     q.awaitingDetails.length > 0 ||
     q.humanReview.length > 0 ||
     q.partialExtraction.length > 0 ||

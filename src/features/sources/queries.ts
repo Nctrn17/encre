@@ -22,7 +22,8 @@ export interface SourceDetail {
 export async function getSourceBySlug(slug: string): Promise<SourceDetail | null> {
   const supabase = createPublicClient()
   const { data } = await supabase
-    .from('sources')
+    // Vue publique (config purgée des clés sensibles, cf. migration 0037).
+    .from('sources_public')
     .select('id, slug, name, kind, config, is_active, last_run_at')
     .eq('slug', slug)
     .eq('is_active', true)
@@ -34,7 +35,7 @@ export async function getSourceBySlug(slug: string): Promise<SourceDetail | null
 export async function listActiveSourceSlugs(): Promise<string[]> {
   const supabase = createPublicClient()
   const { data } = await supabase
-    .from('sources')
+    .from('sources_public')
     .select('slug')
     .eq('is_active', true)
     .neq('kind', 'manual')

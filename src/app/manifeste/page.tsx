@@ -128,8 +128,7 @@ export default function ManifestePage() {
             ni si vous obtiendrez l&apos;aide.
           </p>
           <p>
-            Nous indiquons ce que dit le règlement, vous restez seul à
-            savoir si vous correspondez.
+            Nous indiquons ce que dit le règlement, à vous de juger si vous correspondez.
           </p>
         </Section>
 
@@ -155,7 +154,7 @@ export default function ManifestePage() {
 
         <Section num="V." title="L'engagement">
           <p>
-            Encre restera gratuit pour les utilisateurs, indéfiniment.
+            Encre restera gratuit pour toutes et tous, indéfiniment.
           </p>
           <p>
             Si l&apos;outil devient nécessaire à grande échelle, sa
@@ -164,7 +163,7 @@ export default function ManifestePage() {
             subventions publiques compatibles avec son indépendance
             éditoriale.
           </p>
-          <p>Jamais par la monétisation des utilisateurs.</p>
+          <p>Jamais en vous monétisant.</p>
         </Section>
       </article>
 

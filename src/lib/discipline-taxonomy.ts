@@ -1,7 +1,7 @@
 /**
  * Taxonomie des disciplines couvertes par l'agrégateur.
  * Source unique de vérité utilisée par :
- *   - classification IA (prompt Gemini API - Gemma 4 31B / Gemini 3 Flash)
+ *   - classification IA (prompt Gemini API — Gemma 4 31B / Gemini 3 Flash)
  *   - formulaires d'alerte utilisateur
  *   - pages hub SEO `/disciplines/[slug]`
  *   - normalisation des scrapers

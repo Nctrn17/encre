@@ -29,7 +29,7 @@ export interface AlertProfile {
 
 /**
  * Liste des profils d'alerte de l'utilisateur connecté.
- * Retourne [] si non connecté (pas d'erreur levée - UX plus douce).
+ * Retourne [] si non connecté (pas d'erreur levée — UX plus douce).
  */
 export async function listUserAlertProfiles(): Promise<AlertProfile[]> {
   const supabase = await createClient()

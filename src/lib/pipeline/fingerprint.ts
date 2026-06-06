@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { slugify } from '@/lib/utils'
 
 /**
- * Calcule le fingerprint d'une opportunité - utilisé pour la déduplication
+ * Calcule le fingerprint d'une opportunité — utilisé pour la déduplication
  * rapide (niveau 2 après la clé naturelle `(source, external_id)`).
  *
  * Formule : sha256(lower(trim(title)) + emitter_slug + deadline_iso)
@@ -48,10 +48,10 @@ export function generateOpportunitySlug(params: {
   const titlePart = slugify(params.title, 80)
   const emitterSlug = params.emitter ? slugify(params.emitter, 30) : ''
   // Dedupe : si le slug-émetteur est déjà présent comme sous-chaîne du
-  // slug-titre (cas fréquent : « Moulin d'Andé CÉCI - Résidence X » avec
-  // émetteur « Moulin d'Andé - CÉCI »), on n'ajoute pas le suffixe émetteur
+  // slug-titre (cas fréquent : « Moulin d'Andé CÉCI — Résidence X » avec
+  // émetteur « Moulin d'Andé — CÉCI »), on n'ajoute pas le suffixe émetteur
   // pour éviter `moulin-d-ande-ceci-residence-x-moulin-d-ande-ceci`.
-  // On accepte aussi le cas inverse (émetteur contient titre) - rare mais
+  // On accepte aussi le cas inverse (émetteur contient titre) — rare mais
   // valide après normalisation.
   const emitterAlreadyInTitle =
     emitterSlug.length > 0 && (titlePart.includes(emitterSlug) || emitterSlug.includes(titlePart))

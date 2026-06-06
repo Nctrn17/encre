@@ -33,7 +33,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 const SITE_URL = getSiteUrl()
-const DEFAULT_TITLE = `${SITE_NAME} · Aides à l'écriture pour scénaristes et auteurs`
+const DEFAULT_TITLE = `${SITE_NAME} · Aides à l'écriture pour scénaristes, autrices et auteurs`
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -50,12 +50,20 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: DEFAULT_TITLE,
     description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: '/og.png',
+        width: 1200,
+        height: 630,
+        alt: DEFAULT_TITLE,
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: DEFAULT_TITLE,
     description: SITE_DESCRIPTION,
-    images: ['/opengraph-image'],
+    images: ['/og.png'],
   },
   robots: {
     index: true,
@@ -67,10 +75,9 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f4ede0' },
-    { media: '(prefers-color-scheme: dark)', color: '#1c1817' },
-  ],
+  // Pas de dark mode (le site est volontairement clair, papier cream). Un seul
+  // themeColor pour éviter une barre de navigateur charbon sur fond cream.
+  themeColor: '#f4ede0',
 }
 
 const siteJsonLd = {

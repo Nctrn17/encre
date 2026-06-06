@@ -61,7 +61,7 @@ export default function CguPage() {
         </p>
         <p>
           L&apos;éditeur ne garantit ni l&apos;exhaustivité ni la conformité
-          stricte au règlement officiel de chaque dispositif. Avant toute
+          stricte au règlement officiel de chaque appel. Avant toute
           candidature, l&apos;utilisateur·rice est tenu·e de consulter la
           source officielle de l&apos;émetteur, lien toujours mis en avant
           dans chaque fiche.
@@ -77,7 +77,7 @@ export default function CguPage() {
           {[
             'des candidatures rejetées, hors délai, incomplètes ou non conformes ;',
             'des décisions prises par les jurys et commissions de sélection ;',
-            'de la modification ou de l\'interruption d\'un dispositif par son émetteur ;',
+            'de la modification ou de l\'interruption d\'un appel par son émetteur ;',
             'des dommages indirects résultant de l\'usage du service.',
           ].map((t, i) => (
             <li key={i} className="pl-6 relative">
@@ -101,7 +101,7 @@ export default function CguPage() {
       <LegalSection number="6" title="Modifications des CGU">
         <p>
           Les présentes conditions peuvent évoluer, notamment lors du passage
-          à la version publique du service. Les utilisateurs inscrits à la
+          à la version publique du service. Les utilisateur·rices inscrit·es à la
           veille seront informés par courriel de toute modification substantielle,
           avec un délai minimum de quinze jours avant application.
         </p>

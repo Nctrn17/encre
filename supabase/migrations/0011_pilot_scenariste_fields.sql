@@ -1,10 +1,12 @@
--- Migration 0011 - Pilote scénariste : champs d'accessibilité et filtrage
+-- Migration 0011 — Pilote scénariste : champs d'accessibilité et filtrage
 --
+-- Contexte : voir docs/PILOTE-SCENARISTES.md
 -- Cette migration ajoute les 5 champs nécessaires au matcher pour le pilote
 -- scénariste/réalisateur hors-réseau. Les champs sont nullable pour permettre
--- un remplissage progressif (par le classifier LLM lors de la reclassif des
--- items existants, puis systématiquement à l'insertion des nouveaux items).
+-- un remplissage progressif (par Haiku lors de la reclassif des 147 items
+-- existants, puis systématiquement à l'insertion des nouveaux items).
 --
+-- Ordre de run : après 0010_add_grec_source.sql
 -- Rollback possible : oui (DROP COLUMN IF EXISTS pour chaque champ)
 
 BEGIN;
@@ -22,7 +24,7 @@ ALTER TABLE opportunities
   ADD COLUMN IF NOT EXISTS hors_reseau_friendly boolean DEFAULT false;
 
 COMMENT ON COLUMN opportunities.hors_reseau_friendly IS
-  'TRUE si un auteur peut candidater seul (pas d''éditeur/producteur/agent requis). Défaut FALSE par précaution - préfère cacher qu''inventer de l''accès.';
+  'TRUE si un auteur peut candidater seul (pas d''éditeur/producteur/agent requis). Défaut FALSE par précaution — préfère cacher qu''inventer de l''accès.';
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- Champ 2 : min_films_produits
@@ -109,3 +111,27 @@ CREATE INDEX IF NOT EXISTS idx_opps_age_max
   WHERE age_max IS NOT NULL;
 
 COMMIT;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- NOTES D'IMPLÉMENTATION (suite à prévoir en code, pas ici)
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- 1. Mettre à jour src/lib/pipeline/classify.ts pour que Haiku remplisse ces
+--    5 champs lors de la classification (ajouter au prompt + parsing Zod).
+--    Voir docs/PILOTE-SCENARISTES.md section 6 pour le prompt addendum.
+--
+-- 2. Écrire scripts/reclassify.ts qui retraite les 147 items existants avec
+--    le classifier enrichi. Coût estimé ~$0.30-0.50 via Haiku.
+--
+-- 3. Mettre à jour src/features/opportunities/queries.ts pour :
+--    - Filtrer par défaut hors_reseau_friendly = true si onboarding dit
+--      "0 films + pas de producteur".
+--    - Toggle UI "Voir aussi les aides qui nécessitent un producteur/éditeur".
+--    - Utiliser disciplines_tags && user.disciplines_cibles pour le match.
+--
+-- 4. Mettre à jour src/app/(public)/onboarding/ pour les 5 questions scénariste
+--    (âge, région, films produits, a producteur, type de projet).
+--
+-- 5. Prévoir la règle auto-rollover deadline dans les Server Components qui
+--    affichent les opps : si deadline < now(), afficher "Prochain appel
+--    attendu : [mois année]" plutôt que masquer.

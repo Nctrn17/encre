@@ -28,12 +28,6 @@ Thumbs.db
 .vscode/*
 !.vscode/settings.json
 
-# local tooling / agent configs
-.agents/
-.claude/
-.cursor/
-AGENTS.md
-
 # Supabase
 .branches
 .temp

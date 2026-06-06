@@ -5,7 +5,7 @@ import { useState } from 'react'
 type Status = 'idle' | 'submitting' | 'success' | 'error'
 
 /**
- * Waitlist form simplifié pour la hero Plateau - une seule ligne email
+ * Waitlist form simplifié pour la hero Plateau — une seule ligne email
  * avec bouton Fraunces →. Pas de multi-select discipline/région ici,
  * l'utilisateur affinera son profil via /onboarding après inscription.
  */
@@ -31,12 +31,22 @@ export function WaitlistForm() {
       })
       if (!response.ok) {
         const data = await response.json().catch(() => ({}))
-        throw new Error(data.error ?? `HTTP ${response.status}`)
+        throw new Error(
+          typeof data.error === 'string'
+            ? data.error
+            : 'Une erreur est survenue. Réessayez dans un instant.',
+        )
       }
       setStatus('success')
     } catch (err) {
       setStatus('error')
-      setErrorMsg((err as Error).message)
+      const msg = (err as Error).message
+      // Ne jamais exposer un message technique (ex. « Failed to fetch »).
+      setErrorMsg(
+        msg && !/failed to fetch|networkerror|load failed/i.test(msg)
+          ? msg
+          : 'Connexion impossible. Vérifiez votre réseau et réessayez.',
+      )
     }
   }
 
@@ -47,13 +57,17 @@ export function WaitlistForm() {
           className="fraunces-italic text-[20px]"
           style={{ color: 'var(--ink)' }}
         >
-          Merci. Un email à l&apos;ouverture publique.
+          Merci, votre adresse est enregistrée.
         </div>
         <div
           className="mono-meta mt-3"
           style={{ color: 'var(--ink-muted)' }}
         >
-          Vous pouvez affiner votre veille en attendant,{' '}
+          Le registre est déjà consultable :{' '}
+          <a href="/aides" className="link" style={{ color: 'var(--vermillion)' }}>
+            voir les aides ouvertes →
+          </a>
+          . Pour une revue adaptée à votre profil,{' '}
           <a href="/onboarding" className="link" style={{ color: 'var(--vermillion)' }}>
             composer une veille →
           </a>

@@ -23,8 +23,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
       - name: Typecheck
         run: npm run typecheck
 
       - name: Unit tests
         run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          # Le build prérend des pages ISR qui lisent Supabase (anon, données
+          # publiques only). Avec les secrets configurés, le prerender est réel ;
+          # sinon, les generateStaticParams retombent sur [] (fetch échoue) et le
+          # build vérifie tout de même la compilation Next.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'ci-placeholder-anon-key' }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'https://encre.io' }}

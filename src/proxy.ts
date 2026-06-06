@@ -5,7 +5,7 @@ import { createServerClient } from '@supabase/ssr'
  * Proxy (ex-middleware, renommé en Next.js 16).
  * Rafraîchit la session Supabase à chaque requête.
  *
- * No-op si NEXT_PUBLIC_SUPABASE_URL / ANON_KEY absent - permet de lancer
+ * No-op si NEXT_PUBLIC_SUPABASE_URL / ANON_KEY absent — permet de lancer
  * le site en dev sans config complète.
  */
 export async function proxy(request: NextRequest) {

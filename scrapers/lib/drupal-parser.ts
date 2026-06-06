@@ -140,7 +140,7 @@ export function parseDrupalListing(
 /**
  * Variante avec "enrichissement detail" : après avoir récupéré le listing,
  * fetch la page de chaque item pour en extraire la deadline et la description
- * longue. Coûteux en requêtes (N+1) - à utiliser avec parcimonie.
+ * longue. Coûteux en requêtes (N+1) — à utiliser avec parcimonie.
  *
  * Non utilisé au MVP. Placeholder pour v2.
  */
